@@ -18,7 +18,7 @@ int rola_dados(){
 }
 
 
-void inicializa_personagens(jogador *j){ // Inicializa o personagem, definido a sua podeição como 0 e defindo seu nome e sua cor
+void inicializa_personagens(jogador *j){ // Inicializa o personagem, definido a sua podeição como 0 e defindo seu nome e sua cor (a cor não foi feita ainda)
     j->posicao = 0;
 	char afirma = 's';
 	
