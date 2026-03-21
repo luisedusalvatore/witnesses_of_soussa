@@ -5,7 +5,8 @@
 
 typedef struct{
 		char nome[51];
-        int posicao = 0;
+        int posicao;
+		char cor[10];
 		tp_pilha perguntas[100];
 	} jogador;
 	
@@ -17,14 +18,26 @@ int rola_dados(){
 }
 
 
-void seleciona_personagens(jogador *j){
-    
+void inicializa_personagens(jogador *j){ // Inicializa o personagem, definido a sua podeição como 0 e defindo seu nome e sua cor
+    j->posicao = 0;
+	char afirma = 's';
+	
+	
+	while(afirma != 'n'){
 	printf("Escolha o seu personagem, o nome deve ter até 50 caracteres:\n");
     scanf(" %[^\n]", j->nome);
+	printf("O seu nome eh: %s\nDeseja alerar?(s/n): ", j->nome);
+	scanf(" %c", &afirma);
 	}
-	
+}
+
+
+
+
 	
 int main(){
+	jogador j1;
+	inicializa_personagens(&j1);
 
 
 return 0;
