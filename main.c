@@ -32,8 +32,10 @@ void inicializa_personagens(jogador *j){ // Inicializa o personagem, definido a 
 	}
 }
 
-int main() {
-   jogador j1;
+int main(){
+	jogador j1;
 	inicializa_personagens(&j1);
-}
 
+
+	 return 0;
+}
