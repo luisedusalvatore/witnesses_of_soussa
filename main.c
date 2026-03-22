@@ -24,21 +24,42 @@ void inicializa_personagens(jogador *j){ // Inicializa o personagem, definido a 
 	
 	
 	while(afirma != 'n'){
-	printf("Escolha o seu personagem, o nome deve ter até 50 caracteres:\n");
+	printf("Defina um nome para seu personagem (máximo de 50 caracteres):\n");
     scanf(" %[^\n]", j->nome);
-	printf("O seu nome eh: %s\nDeseja alerar?(s/n): ", j->nome);
+	printf("O seu nome eh: %s\nDeseja alerar?(s/n)\n: ", j->nome);
 	scanf(" %c", &afirma);
+	
 	}
 }
 
 
 
-
 	
 int main(){
-	jogador j1;
-	inicializa_personagens(&j1);
+	#include <stdio.h>
 
+// Definindo a struct baseada no que aparece no seu código
+typedef struct {
+    int posicao;
+    char nome[50];
+    // A cor foi omitida conforme o comentário na sua imagem
+} jogador;
 
-return 0;
+// A sua função (exatamente como na imagem, com o espaço no scanf para limpar o buffer)
+void inicializa_personagens(jogador *j) {
+    j->posicao = 0;
+    char afirma = 's';
+
+    while(afirma != 'n') {
+        printf("Defina um nome para seu personagem (maximo de 50 caracteres):\n");
+        scanf(" %[^\n]", j->nome); // O espaço antes do % ajuda a evitar bugs de leitura
+        printf("O seu nome eh: %s\nDeseja alterar?(s/n): ", j->nome);
+        scanf(" %c", &afirma);
+    }
 }
+
+int main() {
+   jogador j1;
+	inicializa_personagens(&j1);
+}
+
