@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "c:/Users/Carlos/witnesses_of_soussa",
-      "program": "c:/Users/Carlos/witnesses_of_soussa/build/Debug/outDebug",
+      "program": "c:/Users/Carlos/witnesses_of_soussa/main.exe",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
