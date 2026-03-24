@@ -1,7 +1,7 @@
-# include <stdio.h>
-# include "pilha.h'
-# include <stdlib.h>
-# include <string.h>
+#include <stdio.h>
+#include "pilha.h"
+#include <stdlib.h>
+#include <string.h>
 #include <locale.h>
 
 typedef struct{
