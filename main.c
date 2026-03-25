@@ -5,17 +5,11 @@
 #include <locale.h>
 #include <ctype.h>
 
-typedef struct{
-		char nome[51];
-        int posicao;
-		char cor[10];
-		tp_pilha perguntas[100];
-	} jogador;
-
 typedef struct{		// struct de jogadores
 
     char nome[25];
     int cor;
+    int posicao;
 
 }Player;
 	
