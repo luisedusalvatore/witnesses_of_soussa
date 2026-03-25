@@ -260,9 +260,9 @@ void lerDados(Player *player, int quant){
     }
 }
 
-int geraPergunta(int e){
+int geraPergunta(){
     char resposta;
-    
+    int e = seletor_de_questão(10);
     switch(e){
         case 0: 
             printf("As pilhas sao uma struct que retornam o primeiro dado inserido? V/F\n");
