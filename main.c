@@ -4,6 +4,7 @@
 #include <string.h>
 #include <locale.h>
 #include <ctype.h>
+#include <time.h>
 
 typedef struct{		// struct de jogadores
 
@@ -15,9 +16,15 @@ typedef struct{		// struct de jogadores
 	
 
 int rola_dados(){
+    int valor;
+    srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
     int maior = 6; // define o maior valor que vai ser rolado no dado
 	int menor = 1; // define o menor valor que será rolado no dado
-	return rand() % (maior - menor + 1); // retorna um numero aleatorio entre 6 e 1 (valores dos dados)
+    valor = rand() % (maior - menor + 1); // Gera um valor aleatorio
+    while(valor == 0){
+        valor = rand() % (maior - menor + 1); // Gera um valor aleatorio
+    }
+    return valor;
 }
 
 
@@ -329,6 +336,7 @@ int geraPergunta(int e){
 
 int main(){
     int e;
+    srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
 
     Player player[4]; // definição da struct na main como vetor com quantidade máxima de player
     int quant; // quantidade de jogadores
@@ -341,8 +349,8 @@ int main(){
 
     imprimirJogadores(player,quant);
 
-    e = rand() % 9;
-    printf("%d", e);
+    e = rand() % 10;
+    printf("%d\n", rola_dados());
     
 
     return 0;
