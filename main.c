@@ -21,10 +21,15 @@ int rola_dados(){
     int maior = 6; // define o maior valor que vai ser rolado no dado
 	int menor = 1; // define o menor valor que será rolado no dado
     valor = rand() % (maior - menor + 1); // Gera um valor aleatorio
-    while(valor == 0){
-        valor = rand() % (maior - menor + 1); // Gera um valor aleatorio
-    }
-    return valor;
+    return valor+1;
+}
+
+int seletor_de_questão(int qtd){
+    int e;
+    srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
+
+    e = rand() % (qtd); // Gera um valor aleatorio entre 0 e qtd de perguntas
+    return e;
 }
 
 
@@ -349,8 +354,7 @@ int main(){
 
     imprimirJogadores(player,quant);
 
-    e = rand() % 10;
-    printf("%d\n", rola_dados());
+    
     
 
     return 0;
