@@ -349,7 +349,8 @@ int main(){
 
     lerDados(player, quant); // função para ler todos os dados dos jogadores, com o vetor de struct e a quantidade de jogadores como parâmetro
 
-    imprimirJogadores(player,quant);
+    printf("%d\n", geraPergunta());
+
 
     
     
