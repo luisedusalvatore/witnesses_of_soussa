@@ -33,9 +33,10 @@ int push(tp_pilha *p, tp_item e){
 		p->topo += 1;
 		p->item[p->topo] = e;
 		return 1;
+	}
 	return 0;
 		
-	}
+	
 }
 
 int pop(tp_pilha *p, tp_item *e){
