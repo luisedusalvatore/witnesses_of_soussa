@@ -64,7 +64,7 @@ int verificarCor(Player *player, int corAux, int jogadorAtual){ // função para
 
 void sousaEasterEgg(char *nomeAux){
 
-    if (stricmp(nomeAux, "Sousa") == 0){    // string "i" compare para facilitar possiveis variantes de um mesmo resultado (isensitive)
+    if (strcmp(nomeAux, "Sousa") == 0){    // string "i" compare para facilitar possiveis variantes de um mesmo resultado (isensitive)
         printf("\n\033[33m[SEGREDO DESBLOQUEADO] O dinossauro da computação entrou na partida!\033[0m\n");
 
         printf("\033[33m");
@@ -96,7 +96,7 @@ void sousaEasterEgg(char *nomeAux){
         printf("\033[0m\n");
     }
 
-    if (stricmp(nomeAux, "Sanval") == 0){    // string "i" compare para facilitar possiveis variantes de um mesmo resultado (isensitive)
+    if (strcmp(nomeAux, "Sanval") == 0){    // string "i" compare para facilitar possiveis variantes de um mesmo resultado (isensitive)
         printf("\n\033[33m[SEGREDO DESBLOQUEADO] O cara do Breaking Bad? Ele também tá aqui!\033[0m\n");
 
         printf("\033[33m");
@@ -328,6 +328,7 @@ int geraPergunta(int e){
 }
 
 int main(){
+    int e;
 
     Player player[4]; // definição da struct na main como vetor com quantidade máxima de player
     int quant; // quantidade de jogadores
@@ -339,6 +340,10 @@ int main(){
     lerDados(player, quant); // função para ler todos os dados dos jogadores, com o vetor de struct e a quantidade de jogadores como parâmetro
 
     imprimirJogadores(player,quant);
+
+    e = rand() % 9;
+    printf("%d", e);
+    
 
     return 0;
 }
