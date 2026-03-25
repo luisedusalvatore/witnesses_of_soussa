@@ -18,16 +18,13 @@ typedef struct{		// struct de jogadores
 int rola_dados(){
     int valor;
     srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
-    int maior = 6; // define o maior valor que vai ser rolado no dado
-	int menor = 1; // define o menor valor que será rolado no dado
-    valor = rand() % (maior - menor + 1); // Gera um valor aleatorio
-    return valor+1;
+    valor = (rand()%(6))+1; // Gera um valor aleatorio
+    return valor;
 }
 
 int seletor_de_questão(int qtd){
     int e;
     srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
-
     e = rand() % (qtd); // Gera um valor aleatorio entre 0 e qtd de perguntas
     return e;
 }
