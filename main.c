@@ -253,7 +253,84 @@ void lerDados(Player *player, int quant){
     }
 }
 
+int geraPergunta(int e){
+    char resposta;
+    
+    switch(e){
+        case 0: 
+            printf("As pilhas sao uma struct que retornam o primeiro dado inserido? V/F\n");
+            scanf(" %c", &resposta); 
+            if (toupper(resposta) == 'F')
+                return 1;
+            else 
+                return 0;
+        case 1:
+            printf("Para acessar o conteudo de uma variavel, deve-se igualar o ponteiro 'p' ao endereco da variavel V/F\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == 'V')
+                return 1;
+            else 
+                return 0;        
+        case 2:
+            printf("Qual o tipo de dado que consegue armazenar varios tipos de dados? int(1) float(2) char(3) struct(4)\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == '4')
+                return 1;
+            else 
+                return 0;
+        case 3:
+            printf("Qual o comando utilizado para adicionar um item na pilha? pop(1) top(2) push(3) endif(4)\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == '3')
+                return 1;
+            else 
+                return 0;
+        case 4:
+            printf("Em uma fila, qual o comando utilizado para que seja verificar se ela esta cheia? queue(1) proximo(2) remove(3) push(4)\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == '2')
+                return 1;
+            else 
+                return 0;    
+        case 5:
+            printf("Em uma string, qual o termo utilizado para limitar a ultima casa?  nulo(1) void(2) \\0(3) 0(4)\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == '3')
+                return 1;
+            else 
+                return 0;    
+        case 6:
+            printf("Qual a principal caracteristica de uma fila? siso(1) fifo(2) lifo(3) filo(4)\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == '2')
+                return 1;
+            else 
+                return 0;
+        case 7:
+            printf("Considerando int x = y e *p = x, qual das alternativas pode alterar o valor de x? *p = 10(1) p = 10(2) &p = 10(3) nenhuma das anteriores(4)\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == '4')
+                return 1;
+            else 
+                return 0;    
+        case 8:
+            printf("Em qual dos casos se faz necessario utilizar '->' ao inves de '*'? pilha(1) ponteiro(2) struct(3) string(4)\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == '3')
+                return 1;
+            else 
+                return 0;    
+        case 9:
+            printf("Qual o especificador utilizado para imprimir uma fila contendo uma sequencia de caracteres? %%s(1) %%c(2) %%d(3) %%f(4)\n");
+            scanf(" %c", &resposta);
+            if (toupper(resposta) == '1')
+                return 1;
+            else 
+                return 0;    
+    }
 
+    return 0;
+}
 
 int main(){
 
