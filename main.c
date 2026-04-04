@@ -23,8 +23,7 @@ int rola_dados(){
 }
 
 int seletor_de_questão(int qtd){
-    int e;
-    srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
+    int e; 
     e = rand() % (qtd); // Gera um valor aleatorio entre 0 e qtd de perguntas
     return e;
 }
