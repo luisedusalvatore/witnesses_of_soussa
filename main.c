@@ -16,8 +16,7 @@ typedef struct{		// struct de jogadores
 	
 
 int rola_dados(){
-    int valor;
-    srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
+    int valor; 
     valor = (rand()%(6))+1; // Gera um valor aleatorio
     return valor;
 }
