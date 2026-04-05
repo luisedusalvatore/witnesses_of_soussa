@@ -343,7 +343,7 @@ int main(){
 
     setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
 
-    quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
+    int quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
 
     lerDados(player, quant); // função para ler todos os dados dos jogadores, com o vetor de struct e a quantidade de jogadores como parâmetro
 
