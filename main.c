@@ -338,9 +338,32 @@ int geraPergunta(){
     return 0;
 }
 
+void jogadorfila(tp_fila *f, char p[],int tam){
+    for(int i=0, i < tam, i++){
+        inserefila(f,p[i]);
+    }
+}
+
+void rodadaplayer(tp_fila *f){
+    Player pi;
+    if(!filavazia(f)){
+        removefila(f,&pi);
+        int resultado = rola_dados();
+        p.posicao += resultado;
+        if(p.posicao >= 30){
+        printf("o jogador %s venceu o jogo", p.nome);
+        }else{
+        inserefila(f,p);
+    }
+    
+}
+}
 int main(){
     int e;
     srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
+	tp_fila f;
+    inicializafila(&f);
+    int tam;
 
     Player player[4]; // definição da struct na main como vetor com quantidade máxima de player
     int quant; // quantidade de jogadores
@@ -348,6 +371,10 @@ int main(){
     setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
     quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
 
+	jogadorfila(&f,player,tam);
+
+    rodadaplayer(&f);
+	
     lerDados(player, quant); // função para ler todos os dados dos jogadores, com o vetor de struct e a quantidade de jogadores como parâmetro
 
     printf("%d\n", geraPergunta());
