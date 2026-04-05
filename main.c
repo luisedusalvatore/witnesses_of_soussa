@@ -27,6 +27,10 @@ int seletor_de_questão(int qtd){
     return e;
 }
 
+void move_posicao(Player *jogador, int posi){
+    jogador->posicao += posi;
+}
+
 
 int quantidade(){
     int quant_players; // variavel local da função que irá retornar a quantidade de jogadores para a main
