@@ -357,7 +357,11 @@ void rodadaplayer(Player jogador[], int *quant){
     *quant = (*quant+1) % *quant;
     }
     
-
+void inicializa_posicao(Player jogador[],int qtd){
+    for(int i = 0; i < qtd; i++){
+        jogador[i].posicao = 0;
+    }
+}
 
 int main(){
     int e;
@@ -372,7 +376,7 @@ int main(){
     setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
     quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
 
-
+    inicializa_posicao(jogador, quant);
    
 	
     lerDados(jogador, quant); // função para ler todos os dados dos jogadores, com o vetor de struct e a quantidade de jogadores como parâmetro
@@ -387,4 +391,4 @@ int main(){
 
     return 0;
 }
-2
+
