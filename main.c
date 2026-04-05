@@ -338,14 +338,22 @@ int geraPergunta(){
 }
 
 void move_posicao(Player *jogador, int posi){
-    jogador->posicao += posi;
+    if(jogador->posicao >= 0){
+        jogador->posicao += posi;
+    }
+    
 }
 
 
 
-void rodadaplayer(Player *jogador[], int quant){
-    tp_item e;
-    move_posicao(jogador[quant], rola_dados());
+void rodadaplayer(Player jogador[], int quant){
+    int resposta;
+    
+    resposta = geraPergunta();
+    if(resposta == 1)move_posicao(&jogador[quant], rola_dados());
+    else{
+        move_posicao(&jogador[quant], -3);
+    }
     quant = (quant+1) % quant;
     }
     
@@ -365,9 +373,10 @@ int main(){
     quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
 
 
-    rodadaplayer(&jogador, quant);
+   
 	
     lerDados(jogador, quant); // função para ler todos os dados dos jogadores, com o vetor de struct e a quantidade de jogadores como parâmetro
+     rodadaplayer(jogador, quant); // realiza uma rodada 
 
     printf("%d\n", geraPergunta());
 
