@@ -341,19 +341,19 @@ void jogadorfila(tp_fila *f, char p[],int tam){
 }
 
 void rodadaplayer(tp_fila *f){
-    player pi;
+    Player pi;
     if(!filavazia(f)){
         removefila(f,&pi);
         int resultado = rola_dados();
         p.posicao += resultado;
         if(p.posicao >= 30){
         printf("o jogador %s venceu o jogo", p.nome);
-        }
+        }else{
         inserefila(f,p);
     }
     
 }
-
+}
 int main(){
     int e;
     srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
