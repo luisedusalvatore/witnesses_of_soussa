@@ -354,7 +354,7 @@ int main(){
     printf("%d\n", geraPergunta());
 
 
-    
+    printf("Teste\n");
     
 
     return 0;
