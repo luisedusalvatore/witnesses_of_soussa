@@ -41,6 +41,7 @@ int removeFila (tp_fila *f, tp_item *e){
 	if(filaVazia(f)) return 0;
 	f->ini = proximo(f->ini);
 	*e = f->item[f->ini]; 
+	return 1;
 }
 
 void imprimeFila(tp_fila f){
