@@ -337,7 +337,7 @@ int geraPergunta(){
     return 0;
 }
 
-void move_posicao(Player *jogador, int posi){
+void move_posicao(Player *jogador, int posi){ // Move a posição dos jogadores se eles tiverem acertado ou errado a resposta (Código n operacional)
     if(jogador->posicao >= 0){
         jogador->posicao += posi;
     }
@@ -346,7 +346,7 @@ void move_posicao(Player *jogador, int posi){
 
 
 
-void rodadaplayer(Player jogador[], int *quant){
+void rodadaplayer(Player jogador[], int *quant){ // Realiza as rodadas de cada jogador, definindo e mudando paras o proximo jogador
     int resposta;
     
     resposta = geraPergunta();
@@ -357,7 +357,7 @@ void rodadaplayer(Player jogador[], int *quant){
     *quant = (*quant+1) % *quant;
     }
     
-void inicializa_posicao(Player jogador[],int qtd){
+void inicializa_posicao(Player jogador[],int qtd){ // Define a posição de todos os jogadores no tabileiro como 0
     for(int i = 0; i < qtd; i++){
         jogador[i].posicao = 0;
     }
