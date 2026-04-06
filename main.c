@@ -346,15 +346,15 @@ void move_posicao(Player *jogador, int posi){ // Move a posição dos jogadores 
 
 
 
-void rodadaplayer(Player jogador[], int *quant){ // Realiza as rodadas de cada jogador, definindo e mudando paras o proximo jogador
+void rodadaplayer(Player jogador[], int *posi, int quant){ // Realiza as rodadas de cada jogador, definindo e mudando paras o proximo jogador
     int resposta;
     
     resposta = geraPergunta();
-    if(resposta == 1)move_posicao(&jogador[*quant], rola_dados());
+    if(resposta == 1)move_posicao(&jogador[*posi], rola_dados());
     else{
-        move_posicao(&jogador[*quant], -3);
+        move_posicao(&jogador[*posi], -3);
     }
-    *quant = (*quant+1) % *quant;
+    *posi = (*posi+1) % quant;
     }
     
 void inicializa_posicao(Player jogador[],int qtd){ // Define a posição de todos os jogadores no tabileiro como 0
@@ -365,6 +365,7 @@ void inicializa_posicao(Player jogador[],int qtd){ // Define a posição de todo
 
 int main(){
     int e;
+
     srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
 	tp_fila f;
     inicializaFila(&f);
@@ -372,17 +373,17 @@ int main(){
 
     Player jogador[4]; // definição da struct na main como vetor com quantidade máxima de player
     int quant; // quantidade de jogadores
-
+    int posi; // posição do jogador no tabuleiro
     setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
     quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
-
+    posi = 0; // Inicializa na posição 0
     inicializa_posicao(jogador, quant);
    
 	
     lerDados(jogador, quant); // função para ler todos os dados dos jogadores, com o vetor de struct e a quantidade de jogadores como parâmetro
-     rodadaplayer(jogador, &quant); // realiza uma rodada 
+     rodadaplayer(jogador, &posi, quant); // realiza uma rodada 
      printf("Posicao no Tabuleiro: %d\n", jogador[quant-1].posicao);
-     printf("Posicao dos jogadores: %d\n", quant);
+     printf("Posicao dos jogadores: %d\n", posi);
 
 
 
