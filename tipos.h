@@ -10,9 +10,8 @@ typedef struct{		// struct de jogadores
 
 typedef struct{
 
-    char pergunta[200];
-    char resposta[100];
-    char correto;
+    char enunciado[50];
+    char resposta;
 } tp_pergunta;
 	
 # endif
