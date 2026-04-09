@@ -6,7 +6,7 @@
 # include <stdio.h>
 # define MAX 100
 
-typedef int
+typedef tp_pergunta
 	tp_item;
 	
 typedef struct {

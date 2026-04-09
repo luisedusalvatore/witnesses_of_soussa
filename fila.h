@@ -3,10 +3,10 @@
 #include <stdio.h>
 #define MAX 100
 
-typedef int tp_item;
+typedef Player tp_item_f;
 
 typedef struct{
-	tp_item item[MAX];
+	tp_item_f item[MAX];
 	int ini, fim;
 	// int tam;
 } tp_fila;
@@ -29,7 +29,7 @@ int filaCheia (tp_fila *f){
 		return 1;
 	return 0;
 }
-int insereFila(tp_fila *f, tp_item e){
+int insereFila(tp_fila *f, tp_item_f e){
 	if(filaCheia(f))
 		return 0;
 	f->fim = proximo(f->fim);
@@ -37,7 +37,7 @@ int insereFila(tp_fila *f, tp_item e){
 	return 1;
 }
 
-int removeFila (tp_fila *f, tp_item *e){
+int removeFila (tp_fila *f, tp_item_f *e){
 	if(filaVazia(f)) return 0;
 	f->ini = proximo(f->ini);
 	*e = f->item[f->ini]; 
@@ -45,7 +45,7 @@ int removeFila (tp_fila *f, tp_item *e){
 }
 
 void imprimeFila(tp_fila f){
-	tp_item e;
+	tp_item_f e;
 	while(!filaVazia(&f)){
 		removeFila(&f, &e);
 		printf("%d\n", e);
