@@ -31,7 +31,7 @@ int quantidade(){
     printf("\t\nQuantos jogadores irão participar do jogo? (MAX: 4):\n");
     scanf("%d",&quant_players);
 
-    while(quant_players < 1 || quant_players > 4){  // estrutura de repetição que certifica que usuario não irá prosseguir com valor inválido
+    while(quant_players < 2 || quant_players > 4){  // estrutura de repetição que certifica que usuario não irá prosseguir com valor inválido
         printf("Quantidade não permitida, escolha novamente (MAX: 4):\n");
         scanf("%d",&quant_players);
     }
