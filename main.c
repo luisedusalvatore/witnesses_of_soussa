@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "tipos.h"
 #include "pilha.h"
 #include <stdlib.h>
 #include <string.h>
@@ -7,14 +8,7 @@
 #include <time.h>
 #include "fila.h"
 
-typedef struct{		// struct de jogadores
 
-    char nome[25];
-    int cor;
-    int posicao;
-
-}Player;
-	
 
 int rola_dados(){
     int valor; 
