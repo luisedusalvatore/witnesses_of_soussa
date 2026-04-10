@@ -347,16 +347,15 @@ void inicializa_posicao(Player jogador[],int qtd){ // Define a posição de todo
 }
 
 int main(){
-    int e;
+   
 
     srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
-	tp_fila f;
-    inicializaFila(&f);
-    int tam;
-
     Player jogador[4]; // definição da struct na main como vetor com quantidade máxima de player
     int quant; // quantidade de jogadores
     int posi; // posição do jogador no tabuleiro
+    tp_pilha perguntas;
+    inicializa_pilha(&perguntas);
+    
     setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
     quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
     posi = 0; // Inicializa na posição 0
