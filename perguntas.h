@@ -23,30 +23,75 @@ void baralhoQuestoes() {
 }
 
 void gabaritoQuestoes() {
-    questoes[0].correto = 'F';
-    questoes[1].correto = 'V';
-    questoes[2].correto = '4';
-    questoes[3].correto = '3';
-    questoes[4].correto = '2';
-    questoes[5].correto = '3';
-    questoes[6].correto = '2';
-    questoes[7].correto = '4';
-    questoes[8].correto = '3';
-    questoes[9].correto = '1';
+    questoes[0].resposta = 'F';
+    questoes[1].resposta = 'V';
+    questoes[2].resposta = '4';
+    questoes[3].resposta = '3';
+    questoes[4].resposta = '2';
+    questoes[5].resposta = '3';
+    questoes[6].resposta = '2';
+    questoes[7].resposta = '4';
+    questoes[8].resposta = '3';
+    questoes[9].resposta = '1';
 
 }
 
 
-/*
-void embaralhaQuestoes{
-    
-    for (int i=0; i < qtd; i++){
 
+void embaralhaQuestoes(){
+    srand(time(NULL));
+    
+
+    tp_pilha principal;
+    tp_pilha p1; 
+    tp_pilha p2; 
+    tp_pilha p3; 
+    
+    inicializa_pilha(&p1);inicializa_pilha(&p2); inicializa_pilha(&p3); inicializa_pilha(&principal);  
+    
+    for (int i=0; i < 10; i++){
+       push(&principal, questoes[i]); // Insere todas as questões na pilha principal
+    }
+
+    while(!pilha_vazia(&principal)){
+        tp_pergunta e;
+        int n = rand()%2;    
+        
+        switch (n){
+            case 0: 
+                pop(&principal, &e);
+                push(&p1, e);
+            case 1: 
+                pop(&principal, &e);
+                push(&p2, e);
+            case 2: 
+                pop(&principal, &e);
+                push(&p3, e);        
+
+        }
+    }
+
+    while(!pilha_vazia(&p1)){
+        tp_pergunta e;
+        pop(&p1, &e);
+        push(&principal, e);
+
+    }
+    while(!pilha_vazia(&p2)){
+        tp_pergunta e;
+        pop(&p1, &e);
+        push(&principal, e);
+
+    }
+    while(!pilha_vazia(&p3)){
+        tp_pergunta e;
+        pop(&p1, &e);
+        push(&principal, e);
 
     }
 
-
+    
 }
-*/
+
 
 #endif
