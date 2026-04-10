@@ -7,88 +7,107 @@
 #include "pilha.h"
 #include "tipos.h"
 
-tp_pergunta questoes[10];
 
-void baralhoQuestoes() {
-    strcpy(questoes[0].enunciado, "As pilhas sao uma struct que retornam o primeiro dado inserido? V/F");
-    strcpy(questoes[1].enunciado, "Para acessar o conteudo de uma variavel, deve-se igualar o ponteiro 'p' ao endereco da variavel V/F");
-    strcpy(questoes[2].enunciado, "Qual o tipo de dado que consegue armazenar varios tipos de dados? int(1) float(2) char(3) struct(4)");
-    strcpy(questoes[3].enunciado, "Qual o comando utilizado para adicionar um item na pilha? pop(1) top(2) push(3) endif(4)");
-    strcpy(questoes[4].enunciado, "Em uma fila, qual o comando utilizado para que seja verificar se ela esta cheia? queue(1) proximo(2) remove(3) push(4)");
-    strcpy(questoes[5].enunciado, "Em uma string, qual o termo utilizado para limitar a ultima casa? nulo(1) void(2) \\0(3) 0(4)");
-    strcpy(questoes[6].enunciado, "Qual a principal caracteristica de uma fila? siso(1) fifo(2) lifo(3) filo(4)");
-    strcpy(questoes[7].enunciado, "Considerando int x = y e p = x, qual das alternativas pode alterar o valor de x? p = 10(1) p = 10(2) &p = 10(3) nenhuma das anteriores(4)");
-    strcpy(questoes[8].enunciado, "Em qual dos casos se faz necessario utilizar '->' ao inves de '*'? pilha(1) ponteiro(2) struct(3) string(4)");
-    strcpy(questoes[9].enunciado, "Qual o especificador utilizado para imprimir uma fila contendo uma sequencia de caracteres? %%s(1) %%c(2) %%d(3) %%f(4)");
-}
-
-void gabaritoQuestoes() {
-    questoes[0].resposta = 'F';
-    questoes[1].resposta = 'V';
-    questoes[2].resposta = '4';
-    questoes[3].resposta = '3';
-    questoes[4].resposta = '2';
-    questoes[5].resposta = '3';
-    questoes[6].resposta = '2';
-    questoes[7].resposta = '4';
-    questoes[8].resposta = '3';
-    questoes[9].resposta = '1';
-
-}
-
-
-
-void embaralhaQuestoes(){
-    srand(time(NULL));
+void popula_perguntas(tp_pilha * pilha){
+    int tam = 10;
+    char perguntas[tam][300] = {
+        "As pilhas sao uma struct que retornam o primeiro dado inserido? V/F",
+        "Para acessar o conteudo de uma variavel, deve-se igualar o ponteiro 'p' ao endereco da variavel V/F",
+        "Qual o tipo de dado que consegue armazenar varios tipos de dados? int(1) float(2) char(3) struct(4)",
+        "Qual o comando utilizado para adicionar um item na pilha? pop(1) top(2) push(3) endif(4)",
+        "Em uma fila, qual o comando utilizado para que seja verificar se ela esta cheia? queue(1) proximo(2) remove(3) push(4)",
+        "Em uma string, qual o termo utilizado para limitar a ultima casa? nulo(1) void(2) \\0(3) 0(4)",
+        "Qual a principal caracteristica de uma fila? siso(1) fifo(2) lifo(3) filo(4)",
+        "Considerando int x = y e p = x, qual das alternativas pode alterar o valor de x? p = 10(1) p = 10(2) &p = 10(3) nenhuma das anteriores(4)",
+        "Em qual dos casos se faz necessario utilizar '->' ao inves de '*'? pilha(1) ponteiro(2) struct(3) string(4)",
+        "Qual o especificador utilizado para imprimir uma fila contendo uma sequencia de caracteres? %%s(1) %%c(2) %%d(3) %%f(4)"
+    };
+    char respostas[tam] = {
+        'F',
+        'V',
+        '4',
+        '3',
+        '2',
+        '3',
+        '2',
+        '4',
+        '3',
+        '1',
+    };
+    tp_pergunta questoes;
+    for(int i = 0; i < tam; i++){
+        strcpy(questoes.enunciado, perguntas[i]);
+        questoes.resposta = respostas[i];
+        push(pilha, questoes);
+    }
     
 
-    tp_pilha principal;
+
+}
+
+
+
+void embaralhaQuestoes(tp_pilha *perguntas){
+    srand(time(NULL));
+    
     tp_pilha p1; 
     tp_pilha p2; 
     tp_pilha p3; 
+    tp_pilha p4;
+    tp_pilha p5;
     
-    inicializa_pilha(&p1);inicializa_pilha(&p2); inicializa_pilha(&p3); inicializa_pilha(&principal);  
+    inicializa_pilha(&p1);
+    inicializa_pilha(&p2); 
+    inicializa_pilha(&p3); 
+    inicializa_pilha(&p4);
+    inicializa_pilha(&p5); 
     
-    for (int i=0; i < 10; i++){
-       push(&principal, questoes[i]); // Insere todas as questões na pilha principal
-    }
+    
 
-    while(!pilha_vazia(&principal)){
+    while(!pilha_vazia(perguntas)){
         tp_pergunta e;
-        int n = rand()%2;    
+        int n = rand()%5;    
         
         switch (n){
             case 0: 
-                pop(&principal, &e);
+                pop(perguntas, &e);
                 push(&p1, e);
+                break;
             case 1: 
-                pop(&principal, &e);
+                pop(perguntas, &e);
                 push(&p2, e);
+                break;
             case 2: 
-                pop(&principal, &e);
-                push(&p3, e);        
+                pop(perguntas, &e);
+                push(&p3, e); 
+                break;
+            case 3: 
+                pop(perguntas, &e);
+                push(&p4, e);
+                break;
+            case 4: 
+                pop(perguntas, &e);
+                push(&p5, e); 
+                break;        
 
         }
-    }
+    
 
-    while(!pilha_vazia(&p1)){
-        tp_pergunta e;
+    while(!pilha_vazia(&p1) || !pilha_vazia(&p2) || !pilha_vazia(&p3) || !pilha_vazia(&p4) || !pilha_vazia(&p5)){
         pop(&p1, &e);
-        push(&principal, e);
-
+        push(perguntas, e);
+        pop(&p2, &e);
+        push(perguntas, e);
+        pop(&p2, &e);
+        push(perguntas, e);
+        pop(&p3, &e);
+        push(perguntas, e);
+        pop(&p4, &e);
+        push(perguntas, e);
+        pop(&p4, &e);
+        push(perguntas, e);
     }
-    while(!pilha_vazia(&p2)){
-        tp_pergunta e;
-        pop(&p1, &e);
-        push(&principal, e);
-
-    }
-    while(!pilha_vazia(&p3)){
-        tp_pergunta e;
-        pop(&p1, &e);
-        push(&principal, e);
-
-    }
+}
 
     
 }
