@@ -33,7 +33,8 @@ int pilha_cheia(tp_pilha *p){
 int push(tp_pilha *p, tp_item e){
 	if(pilha_cheia(p) == 0){
 		p->topo += 1;
-		p->item[p->topo] = e;
+		strcpy(p->item[p->topo].enunciado, e.enunciado);
+		p->item[p->topo].resposta = e.resposta;
 		return 1;
 	}
 	return 0;
@@ -45,7 +46,8 @@ int pop(tp_pilha *p, tp_item *e){
 	if (pilha_vazia(p) == 1){
 		return 0;
 	}
-	*e = p->item[p->topo];
+	strcpy(p->item[p->topo].enunciado, e->enunciado);
+	e->resposta = p->item[p->topo].resposta;
 	p->topo--;
 	return 1;
 }
