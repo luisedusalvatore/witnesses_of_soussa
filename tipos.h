@@ -10,7 +10,7 @@ typedef struct{		// struct de jogadores
 
 typedef struct{
 
-    char enunciado[50];
+    char enunciado[300];
     char resposta;
 } tp_pergunta;
 	
