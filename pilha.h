@@ -1,10 +1,12 @@
 // Um grande artista assina a sua obra
 
 
-# ifndef pilha_h
-# define pilha_h
-# include <stdio.h>
-# define MAX 100
+#ifndef pilha_h
+#define pilha_h
+#include <stdio.h>
+#include "tipos.h"
+#define MAX 100
+
 
 typedef tp_pergunta
 	tp_item;
