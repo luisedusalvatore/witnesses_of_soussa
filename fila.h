@@ -1,6 +1,7 @@
 #ifndef fila_h
 #define fila_h
 #include <stdio.h>
+#include <string.h>
 #define MAX 100
 
 typedef Player tp_item_f;
@@ -33,14 +34,18 @@ int insereFila(tp_fila *f, tp_item_f e){
 	if(filaCheia(f))
 		return 0;
 	f->fim = proximo(f->fim);
-	f->item[f->fim]=e;
+	f->item[f->fim].posicao = e.posicao;
+	f->item[f->fim].cor = e.cor;
+	strcpy(f->item[f->fim].nome, e.nome);
 	return 1;
 }
 
 int removeFila (tp_fila *f, tp_item_f *e){
 	if(filaVazia(f)) return 0;
 	f->ini = proximo(f->ini);
-	*e = f->item[f->ini]; 
+	e->posicao = f->item[f->ini].posicao; 
+	e->cor = f->item[f->ini].cor;
+	strcpy(e->nome, f->item[f->ini].nome);
 	return 1;
 }
 
