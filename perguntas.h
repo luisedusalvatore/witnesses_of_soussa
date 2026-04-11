@@ -3,14 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 #include <string.h>
 #include "pilha.h"
 #include "tipos.h"
 
 
-void popula_perguntas(tp_pilha * pilha){
+void popula_perguntas(tp_pilha *pilha){
     int tam = 10;
-    char perguntas[tam][300] = {
+    char perguntas[10][300] = {
         "As pilhas sao uma struct que retornam o primeiro dado inserido? V/F",
         "Para acessar o conteudo de uma variavel, deve-se igualar o ponteiro 'p' ao endereco da variavel V/F",
         "Qual o tipo de dado que consegue armazenar varios tipos de dados? int(1) float(2) char(3) struct(4)",
@@ -22,7 +23,7 @@ void popula_perguntas(tp_pilha * pilha){
         "Em qual dos casos se faz necessario utilizar '->' ao inves de '*'? pilha(1) ponteiro(2) struct(3) string(4)",
         "Qual o especificador utilizado para imprimir uma fila contendo uma sequencia de caracteres? %%s(1) %%c(2) %%d(3) %%f(4)"
     };
-    char respostas[tam] = {
+    char respostas[10] = {
         'F',
         'V',
         '4',
@@ -40,12 +41,7 @@ void popula_perguntas(tp_pilha * pilha){
         questoes.resposta = respostas[i];
         push(pilha, questoes);
     }
-    
-
-
 }
-
-
 
 void embaralhaQuestoes(tp_pilha *perguntas){
     srand(time(NULL));
@@ -62,8 +58,6 @@ void embaralhaQuestoes(tp_pilha *perguntas){
     inicializa_pilha(&p4);
     inicializa_pilha(&p5); 
     
-    
-
     while(!pilha_vazia(perguntas)){
         tp_pergunta e;
         int n = rand()%5;    
@@ -89,28 +83,46 @@ void embaralhaQuestoes(tp_pilha *perguntas){
                 pop(perguntas, &e);
                 push(&p5, e); 
                 break;        
-
         }
-    
+    } 
 
-    while(!pilha_vazia(&p1) || !pilha_vazia(&p2) || !pilha_vazia(&p3) || !pilha_vazia(&p4) || !pilha_vazia(&p5)){
+    while(!pilha_vazia(&p1)){
+        tp_pergunta e;
         pop(&p1, &e);
-        push(perguntas, e);
-        pop(&p2, &e);
-        push(perguntas, e);
-        pop(&p2, &e);
-        push(perguntas, e);
-        pop(&p3, &e);
-        push(perguntas, e);
-        pop(&p4, &e);
-        push(perguntas, e);
-        pop(&p4, &e);
-        push(perguntas, e);
+        push(perguntas, e); 
     }
-}
+    while(!pilha_vazia(&p2)){
+        tp_pergunta e;
+        pop(&p2, &e);
+        push(perguntas, e); 
+    }
+    while(!pilha_vazia(&p3)){
+        tp_pergunta e;
+        pop(&p3, &e);
+        push(perguntas, e); 
+    }
+    while(!pilha_vazia(&p4)){
+        tp_pergunta e;
+        pop(&p4, &e);
+        push(perguntas, e); 
+    }
+    while(!pilha_vazia(&p5)){
+        tp_pergunta e;
+        pop(&p5, &e);
+        push(perguntas, e); 
+    }
+} 
 
-    
+int geraPergunta(tp_pilha *perguntas){
+    tp_pergunta e;
+    char alternativa_selecionada;
+    pop(perguntas, &e);
+    printf("%s", e.enunciado);
+    scanf(" %c", &alternativa_selecionada);
+    if (e.resposta == toupper(alternativa_selecionada))
+        return 1;
+    else    
+        return 0;    
 }
-
 
 #endif
