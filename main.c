@@ -8,6 +8,7 @@
 #include <time.h>
 #include "fila.h"
 #include "randon.h"
+#include "perguntas.h"
 
 
 
@@ -191,13 +192,16 @@ void imprimirJogadores(Player *player, int quantidade) { // função para imprim
     printf("\n");
 }
 
-void lerDados(Player *player, int quant){
+void lerDados(int quant, tp_fila *jogadores){
     int i;
     int confirmNome, confirmCor; // variáveis usadas como adaptação para variável boolean
     char nomeAux[99];   // variavel local para armazenar nome original inserido pelo usuario
     int corAux; // variavel local para armazenar cor original inserida pelo usuario
-
+    
     for(i = 0; i < quant; i++) {    // estrutura de repetição para cadastrar jogadores com condição de parada a quantidade de jogadores
+        Player jogador;
+        inicializa_posicao(&jogador);
+
         printf("\n=============================\n");
         printf("   CADASTRANDO JOGADOR %d\n", i + 1);
         printf("=============================\n");
@@ -210,9 +214,9 @@ void lerDados(Player *player, int quant){
             confirmNome = verificarNome(nomeAux); // variável "boolean"  recebendo o retorno da função que verifica se o nome inserido é permitido
                                                                                                             // 0 = inválido     1 = válido
             if (confirmNome == 1){
-                strcpy(player[i].nome, nomeAux);    // se o nome for válido, ocorre a atribuíção da variavel local auxiliar para o vetor struct
+                strcpy(jogador.nome, nomeAux);    // se o nome for válido, ocorre a atribuíção da variavel local auxiliar para o vetor struct
                                                                                                         // que armazena o nome com a função de string copy
-                sousaEasterEgg(player[i].nome);
+                sousaEasterEgg(jogador.nome);
             }
             else
                 printf("[ERRO] Limite de 19 caracteres excedido. Tente novamente.\n"); // caso inválido, estrutura de repetição while obriga inserir um válido
@@ -224,7 +228,7 @@ void lerDados(Player *player, int quant){
             printf("Sua escolha: ");
             scanf("%d", &corAux);
 
-            confirmCor = verificarCor(player, corAux, i);  // chamada da função que irá verificar se a cor inserida pelo usuario não foi inserida anteriormente
+            confirmCor = verificarCor(jogador, corAux, i);  // chamada da função que irá verificar se a cor inserida pelo usuario não foi inserida anteriormente
 
             if(confirmCor == 1){    // se a cor não foi repetida, ela é validada e atribuída ao jogador atual
                 player[i].cor = corAux;
@@ -236,88 +240,9 @@ void lerDados(Player *player, int quant){
                 // se cor inválida, é impresso erro e obriga o usuario a inserir uma nova cor
             }while(confirmCor!=1);
 
-
+            insereFila(jogador);
             printf("\n>>> Jogador %d adicionado com sucesso! <<<\n", i + 1);
     }
-}
-
-int geraPergunta(){
-    char resposta;
-    int e = seletor_de_questão(10);
-    switch(e){
-        case 0: 
-            printf("As pilhas sao uma struct que retornam o primeiro dado inserido? V/F\n");
-            scanf(" %c", &resposta); 
-            if (toupper(resposta) == 'F')
-                return 1;
-            else 
-                return 0;
-        case 1:
-            printf("Para acessar o conteudo de uma variavel, deve-se igualar o ponteiro 'p' ao endereco da variavel V/F\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == 'V')
-                return 1;
-            else 
-                return 0;        
-        case 2:
-            printf("Qual o tipo de dado que consegue armazenar varios tipos de dados? int(1) float(2) char(3) struct(4)\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == '4')
-                return 1;
-            else 
-                return 0;
-        case 3:
-            printf("Qual o comando utilizado para adicionar um item na pilha? pop(1) top(2) push(3) endif(4)\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == '3')
-                return 1;
-            else 
-                return 0;
-        case 4:
-            printf("Em uma fila, qual o comando utilizado para que seja verificar se ela esta cheia? queue(1) proximo(2) remove(3) push(4)\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == '2')
-                return 1;
-            else 
-                return 0;    
-        case 5:
-            printf("Em uma string, qual o termo utilizado para limitar a ultima casa?  nulo(1) void(2) \\0(3) 0(4)\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == '3')
-                return 1;
-            else 
-                return 0;    
-        case 6:
-            printf("Qual a principal caracteristica de uma fila? siso(1) fifo(2) lifo(3) filo(4)\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == '2')
-                return 1;
-            else 
-                return 0;
-        case 7:
-            printf("Considerando int x = y e *p = x, qual das alternativas pode alterar o valor de x? *p = 10(1) p = 10(2) &p = 10(3) nenhuma das anteriores(4)\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == '4')
-                return 1;
-            else 
-                return 0;    
-        case 8:
-            printf("Em qual dos casos se faz necessario utilizar '->' ao inves de '*'? pilha(1) ponteiro(2) struct(3) string(4)\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == '3')
-                return 1;
-            else 
-                return 0;    
-        case 9:
-            printf("Qual o especificador utilizado para imprimir uma fila contendo uma sequencia de caracteres? %%s(1) %%c(2) %%d(3) %%f(4)\n");
-            scanf(" %c", &resposta);
-            if (toupper(resposta) == '1')
-                return 1;
-            else 
-                return 0;    
-    }
-
-    return 0;
 }
 
 void move_posicao(Player *jogador, int posi){ // Move a posição dos jogadores se eles tiverem acertado ou errado a resposta (Código n operacional)
@@ -340,29 +265,27 @@ void rodadaplayer(Player jogador[], int *posi, int quant){ // Realiza as rodadas
     *posi = (*posi+1) % quant;
     }
     
-void inicializa_posicao(Player jogador[],int qtd){ // Define a posição de todos os jogadores no tabileiro como 0
-    for(int i = 0; i < qtd; i++){
-        jogador[i].posicao = 0;
-    }
+void inicializa_posicao(Player *jogador){ // Define a posição de todos os jogadores no tabileiro como 0
+    jogador->posicao = 0;
 }
 
 int main(){
    
 
     srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
-    Player jogador[4]; // definição da struct na main como vetor com quantidade máxima de player
     int quant; // quantidade de jogadores
     int posi; // posição do jogador no tabuleiro
-    tp_pilha perguntas;
+    tp_pilha perguntas, perguntas_descartadas;
     inicializa_pilha(&perguntas);
-    
+    inicializa_pilha(&perguntas_descartadas);
+    popula_perguntas(&perguntas);
+    embaralhaQuestoes(&perguntas);
     setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
     quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
-    posi = 0; // Inicializa na posição 0
-    inicializa_posicao(jogador, quant);
+
    
 	
-    lerDados(jogador, quant); // função para ler todos os dados dos jogadores, com o vetor de struct e a quantidade de jogadores como parâmetro
+
      rodadaplayer(jogador, &posi, quant); // realiza uma rodada 
      printf("Posicao no Tabuleiro: %d\n", jogador[quant-1].posicao);
      printf("Posicao dos jogadores: %d\n", posi);
