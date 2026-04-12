@@ -19,7 +19,6 @@ int main(){
 
     srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
     int quant; // quantidade de jogadores
-    int posi; // posição do jogador no tabuleiro
     tp_pilha perguntas, perguntas_descartadas;
     tp_fila jogadores;
     inicializa_pilha(&perguntas);
