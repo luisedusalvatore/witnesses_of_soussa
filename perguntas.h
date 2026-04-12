@@ -113,9 +113,19 @@ void embaralhaQuestoes(tp_pilha *perguntas){
     }
 } 
 
-int geraPergunta(tp_pilha *perguntas){
+void transfere_perguntas(tp_pilha *perguntas, tp_pilha *descartadas){
+    while(!pilha_vazia(descartadas)){
+        tp_pergunta e;
+        pop(descartadas, &e);
+        push(perguntas, e);
+        embaralhaQuestoes(perguntas);
+    }
+}
+
+int geraPergunta(tp_pilha *perguntas, tp_pilha *perguntas_descartadas){
     tp_pergunta e;
     char alternativa_selecionada;
+    if(pilha_vazia(perguntas)) transfere_perguntas(perguntas, perguntas_descartadas);
     pop(perguntas, &e);
     printf("%s", e.enunciado);
     scanf(" %c", &alternativa_selecionada);
