@@ -149,6 +149,7 @@ void rodadaplayer(tp_fila *jogadores, tp_pilha *perguntas, tp_pilha *perguntas_d
     int resposta;
     Player jogador;
     removeFila(jogadores, &jogador);
+    printf("Vez de %s\n", jogador.nome);
     resposta = geraPergunta(perguntas, perguntas_descartadas);
     if(resposta == 1)move_posicao(&jogador, rola_dados());
     else{
