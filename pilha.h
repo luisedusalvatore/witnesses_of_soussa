@@ -46,7 +46,7 @@ int pop(tp_pilha *p, tp_item *e){
 	if (pilha_vazia(p) == 1){
 		return 0;
 	}
-	strcpy(p->item[p->topo].enunciado, e->enunciado);
+	strcpy(e->enunciado, p->item[p->topo].enunciado);
 	e->resposta = p->item[p->topo].resposta;
 	p->topo--;
 	return 1;
