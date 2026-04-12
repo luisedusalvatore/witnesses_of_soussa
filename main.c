@@ -35,7 +35,7 @@ int main(){
     rodadaplayer(&jogadores, &perguntas, &perguntas_descartadas); // realiza uma rodada 
 
 
-    printf("Teste\n");
+
     
 
     return 0;
