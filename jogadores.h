@@ -4,7 +4,8 @@
 #include "perguntas.h"
 #include "randon.h"
 #include "easteregg.h"
-#include "listade.h";
+#include "listade.h"
+#include "tipos.h"
 #ifndef jogadores_h
 #define jogadores_h
 
@@ -124,7 +125,7 @@ void lerDados(int quant, tp_fila *jogadores, tp_listade *tabuleiro){
 
             if(confirmCor == 1){    // se a cor não foi repetida, ela é validada e atribuída ao jogador atual
                 jogador.cor = corAux;
-                tabuleiro->ini.info.cor[cor] = 1;
+                tabuleiro->ini->info.cor[confirmCor - 1] = 1;
                 printf("Cor atribuida com sucesso ao jogador %s!\n", jogador.nome);
             }
             
@@ -139,11 +140,21 @@ void lerDados(int quant, tp_fila *jogadores, tp_listade *tabuleiro){
     }
 }
 
-void move_posicao(Player *jogador, int posi){ // Move a posição dos jogadores se eles tiverem acertado ou errado a resposta (Código n operacional)
-    if(jogador->posicao >= 0){
-        jogador->posicao += posi;
+int move_posicao(Player *jogador, int posi){ // Move a posição dos jogadores se eles tiverem acertado ou errado a resposta (Código n operacional)
+    if(posi > 0){
+        jogador->posicao->info.cor[jogador->cor-1] = 0;
+        for(int i = 0; i < posi; i++){
+                jogador->posicao = jogador->posicao->prox;
+                if(jogador->posicao == NULL) return 1; // Condição para acabar o jogo (fim do tabuleiro);
+        }
     }
-    
+    else{
+        for(int i = 0; i < -1*posi; i++){
+            if(jogador->posicao->ant != NULL) jogador->posicao = jogador->posicao->ant;
+        }
+    }
+    jogador->posicao->info.cor[jogador->cor-1] = 1;
+    return 0;
 }
 
 
