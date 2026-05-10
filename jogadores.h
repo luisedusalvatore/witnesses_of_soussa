@@ -4,11 +4,12 @@
 #include "perguntas.h"
 #include "randon.h"
 #include "easteregg.h"
+#include "listade.h";
 #ifndef jogadores_h
 #define jogadores_h
 
-void inicializa_posicao(Player *jogador){ // Define a posição de todos os jogadores no tabileiro como 0
-    jogador->posicao = 0;
+void inicializa_posicao(Player *jogador, tp_listade *inicio){ // Define a posição de todos os jogadores no tabileiro como 0
+    jogador->posicao = inicio->ini;
 }
 
 int quantidade(){
@@ -83,7 +84,7 @@ void imprimirJogadores(Player *player, int quantidade) { // função para imprim
     printf("\n");
 }
 
-void lerDados(int quant, tp_fila *jogadores){
+void lerDados(int quant, tp_fila *jogadores, tp_listade *tabuleiro){
     int i;
     int confirmNome, confirmCor; // variáveis usadas como adaptação para variável boolean
     char nomeAux[99];   // variavel local para armazenar nome original inserido pelo usuario
@@ -91,7 +92,7 @@ void lerDados(int quant, tp_fila *jogadores){
     int cores_usadas[4] = {0,0,0,0};
     for(i = 0; i < quant; i++) {    // estrutura de repetição para cadastrar jogadores com condição de parada a quantidade de jogadores
         Player jogador;
-        inicializa_posicao(&jogador);
+        inicializa_posicao(&jogador, tabuleiro);
 
         printf("\n=============================\n");
         printf("   CADASTRANDO JOGADOR %d\n", i + 1);
@@ -123,8 +124,10 @@ void lerDados(int quant, tp_fila *jogadores){
 
             if(confirmCor == 1){    // se a cor não foi repetida, ela é validada e atribuída ao jogador atual
                 jogador.cor = corAux;
+                tabuleiro->ini.info.cor[cor] = 1;
                 printf("Cor atribuida com sucesso ao jogador %s!\n", jogador.nome);
             }
+            
 
             else
                 printf("[ERRO] Cor ja escolhida por outro jogador ou invalida! Tente novamente.\n");
