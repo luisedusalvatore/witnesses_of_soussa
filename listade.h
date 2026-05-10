@@ -1,18 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "tabuleiro.h"
+#include "tipos.h"
 #ifndef listade_h
 #define listade_h
 
-typedef struct tp_no_aux {
-    struct tp_no_aux *ant;
-    tp_casa info;
-    struct tp_no_aux *prox;
-} tp_no;
-typedef struct {
-    tp_no *ini;
-    tp_no *fim;
-} tp_listade;
 
 tp_listade *inicializa_listade(){
     tp_listade *lista=(tp_listade*) malloc(sizeof(tp_listade));
@@ -28,11 +19,14 @@ tp_no *aloca(){
     tp_no *pt;
     pt=(tp_no*) malloc(sizeof(tp_no));
 }
-int insere_listade_no_fim(tp_listade *lista, int posicao, int tira_carta){
+int insere_listade_no_fim(tp_listade *lista, int posicao, int carta){
     tp_no *novo;
     novo = aloca();
     if(!novo) return 0;
-    novo->info.cor = {0,0,0,0};
+    novo->info.cor[0] = 0;
+    novo->info.cor[1] = 0;
+    novo->info.cor[2] = 0;
+    novo->info.cor[3] = 0;
     novo->info.posicao = posicao;
     novo->info.tira_carta = carta;
     if(listade_vazia(lista)){
