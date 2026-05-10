@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "tipos.h"
 #include "tabuleiro.h"
 #ifndef listade_h
 #define listade_h
@@ -29,13 +28,13 @@ tp_no *aloca(){
     tp_no *pt;
     pt=(tp_no*) malloc(sizeof(tp_no));
 }
-int insere_listade_no_fim(tp_listade *lista, int posicao){
+int insere_listade_no_fim(tp_listade *lista, int posicao, int tira_carta){
     tp_no *novo;
     novo = aloca();
     if(!novo) return 0;
     novo->info.cor = {0,0,0,0};
     novo->info.posicao = posicao;
-    novo->info.tira_carta = tem_carta(posicao);
+    novo->info.tira_carta = carta;
     if(listade_vazia(lista)){
         novo->prox = NULL;
         novo->ant = NULL;
