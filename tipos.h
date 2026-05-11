@@ -1,38 +1,60 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
+#include <locale.h>
+#include <ctype.h>
+#include <time.h>
+#include "tipos.h"
+#include "pilhade.h"
+#include "filade.h"
+#include "randon.h"
+#include "perguntas.h"
+#include "easteregg.h"
+#include "jogadores.h"
+#include "listade.h"
+#include "tabuleiro.h"
 
-# ifndef tipos_h
-# define tipos_h
+int main(){
+    srand(time(NULL)); // gera a seed para os numeros aleatorios
+    int quant;         // quantidade de jogadores
 
+    // declaração da pilha,  fila e lista dinamicas
+    tp_pilha *perguntas;
+    tp_pilha *perguntas_descartadas;
+    tp_fila *jogadores;
+    tp_listade *tabuleiro;
 
-typedef struct {
-    int cor[4];
-    int tira_carta;
-    int posicao;
-} tp_casa;
+    // inicialização das estruturas dinamicas
+    perguntas = inicializa_pilha();
+    perguntas_descartadas = inicializa_pilha();
+    jogadores = inicializa_fila();
+    tabuleiro = inicializa_listade();
 
-typedef struct tp_no_aux {
-    struct tp_no_aux *ant;
-    tp_casa info;
-    struct tp_no_aux *prox;
-} tp_no;
-typedef struct {
-    tp_no *ini;
-    tp_no *fim;
-} tp_listade;
+    // preenche o tabuleiro com a quantidade de casas que a unidade pede (10,20,30)
+    inicia_tabuleiro(tabuleiro, 20);
 
-typedef struct{		// struct de jogadores
+    // popula e embaralha as cartas
+    popula_perguntas(perguntas);
+    embaralhaQuestoes(perguntas);
 
-    char nome[25];
-    int cor;
-    tp_no *posicao;
+    setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
 
-}Player;
+    quant = quantidade(); // atribuição da quantidade de jogadores
 
-typedef struct{
+    // função para colocar os jogadores no tabuleiro
+    lerDados(quant, jogadores, tabuleiro);
 
-    char enunciado[300];
-    char resposta;
-} tp_pergunta;
-	
-# endif
+    rodadaplayer(jogadores, perguntas, perguntas_descartadas); // realiza uma rodada
+
+    // limpar memória
+    destroi_pilha(perguntas);
+    destroi_pilha(perguntas_descartadas);
+    destroi_fila(jogadores);
+    while (!listade_vazia(tabuleiro)) {
+        remove_listade(tabuleiro, tabuleiro->ini->info.posicao);
+    }
+    free(tabuleiro);
+
+    return 0;
+}
+
