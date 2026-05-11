@@ -5,9 +5,8 @@
 #include <time.h>
 #include <ctype.h>
 #include <string.h>
-#include "pilha.h"
+#include "pilhade.h"
 #include "tipos.h"
-
 
 void popula_perguntas(tp_pilha *pilha){
     int tam = 10;
@@ -45,94 +44,63 @@ void popula_perguntas(tp_pilha *pilha){
 
 void embaralhaQuestoes(tp_pilha *perguntas){
     srand(time(NULL));
-    
-    tp_pilha p1; 
-    tp_pilha p2; 
-    tp_pilha p3; 
-    tp_pilha p4;
-    tp_pilha p5;
-    
-    inicializa_pilha(&p1);
-    inicializa_pilha(&p2); 
-    inicializa_pilha(&p3); 
-    inicializa_pilha(&p4);
-    inicializa_pilha(&p5); 
-    
+
+    // pilhas auxiliares alocadas dinamicamente
+    tp_pilha *p1 = inicializa_pilha();
+    tp_pilha *p2 = inicializa_pilha();
+    tp_pilha *p3 = inicializa_pilha();
+    tp_pilha *p4 = inicializa_pilha();
+    tp_pilha *p5 = inicializa_pilha();
+
     while(!pilha_vazia(perguntas)){
         tp_pergunta e;
-        int n = rand()%5;    
-        
-        switch (n){
-            case 0: 
-                pop(perguntas, &e);
-                push(&p1, e);
-                break;
-            case 1: 
-                pop(perguntas, &e);
-                push(&p2, e);
-                break;
-            case 2: 
-                pop(perguntas, &e);
-                push(&p3, e); 
-                break;
-            case 3: 
-                pop(perguntas, &e);
-                push(&p4, e);
-                break;
-            case 4: 
-                pop(perguntas, &e);
-                push(&p5, e); 
-                break;        
-        }
-    } 
+        int n = rand()%5;
 
-    while(!pilha_vazia(&p1)){
-        tp_pergunta e;
-        pop(&p1, &e);
-        push(perguntas, e); 
+        switch (n){
+            case 0: pop(perguntas, &e); push(p1, e); break;
+            case 1: pop(perguntas, &e); push(p2, e); break;
+            case 2: pop(perguntas, &e); push(p3, e); break;
+            case 3: pop(perguntas, &e); push(p4, e); break;
+            case 4: pop(perguntas, &e); push(p5, e); break;
+        }
     }
-    while(!pilha_vazia(&p2)){
-        tp_pergunta e;
-        pop(&p2, &e);
-        push(perguntas, e); 
-    }
-    while(!pilha_vazia(&p3)){
-        tp_pergunta e;
-        pop(&p3, &e);
-        push(perguntas, e); 
-    }
-    while(!pilha_vazia(&p4)){
-        tp_pergunta e;
-        pop(&p4, &e);
-        push(perguntas, e); 
-    }
-    while(!pilha_vazia(&p5)){
-        tp_pergunta e;
-        pop(&p5, &e);
-        push(perguntas, e); 
-    }
-} 
+
+    while(!pilha_vazia(p1)){ tp_pergunta e; pop(p1, &e); push(perguntas, e); }
+    while(!pilha_vazia(p2)){ tp_pergunta e; pop(p2, &e); push(perguntas, e); }
+    while(!pilha_vazia(p3)){ tp_pergunta e; pop(p3, &e); push(perguntas, e); }
+    while(!pilha_vazia(p4)){ tp_pergunta e; pop(p4, &e); push(perguntas, e); }
+    while(!pilha_vazia(p5)){ tp_pergunta e; pop(p5, &e); push(perguntas, e); }
+
+    // destruindo as auxiliares para evitar memory leak
+    destroi_pilha(p1);
+    destroi_pilha(p2);
+    destroi_pilha(p3);
+    destroi_pilha(p4);
+    destroi_pilha(p5);
+}
 
 void transfere_perguntas(tp_pilha *perguntas, tp_pilha *descartadas){
     while(!pilha_vazia(descartadas)){
         tp_pergunta e;
         pop(descartadas, &e);
         push(perguntas, e);
-        embaralhaQuestoes(perguntas);
     }
+    embaralhaQuestoes(perguntas);
 }
 
 int geraPergunta(tp_pilha *perguntas, tp_pilha *perguntas_descartadas){
     tp_pergunta e;
     char alternativa_selecionada;
     if(pilha_vazia(perguntas)) transfere_perguntas(perguntas, perguntas_descartadas);
+
     pop(perguntas, &e);
-    printf("%s", e.enunciado);
+    printf("\n%s\nSua resposta: ", e.enunciado);
     scanf(" %c", &alternativa_selecionada);
+
     if (e.resposta == toupper(alternativa_selecionada))
         return 1;
-    else    
-        return 0;    
+    else
+        return 0;
 }
 
 #endif
