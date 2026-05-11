@@ -1,44 +1,59 @@
 #include <stdio.h>
 #include <string.h>
-#include "tipos.h"
-#include "pilha.h"
 #include <stdlib.h>
 #include <locale.h>
 #include <ctype.h>
 #include <time.h>
-#include "fila.h"
+#include "tipos.h"
+#include "pilhade.h"
+#include "filade.h"
 #include "randon.h"
 #include "perguntas.h"
 #include "easteregg.h"
 #include "jogadores.h"
 #include "listade.h"
-
-
+#include "tabuleiro.h"
 
 int main(){
-   
+    srand(time(NULL)); // gera a seed para os numeros aleatorios
+    int quant;         // quantidade de jogadores
 
-    srand(time(NULL)); // Usa o tempo para gerar os numeros aleatorios 
-    int quant; // quantidade de jogadores
-    tp_pilha perguntas, perguntas_descartadas;
-    tp_fila jogadores;
-    inicializa_pilha(&perguntas);
-    inicializa_pilha(&perguntas_descartadas);
-    inicializaFila(&jogadores);
-    popula_perguntas(&perguntas);
-    embaralhaQuestoes(&perguntas);
+    // declaração da pilha,  fila e lista dinamicas
+    tp_pilha *perguntas;
+    tp_pilha *perguntas_descartadas;
+    tp_fila *jogadores;
+    tp_listade *tabuleiro;
+
+    // inicialização das estruturas dinamicas
+    perguntas = inicializa_pilha();
+    perguntas_descartadas = inicializa_pilha();
+    jogadores = inicializa_fila();
+    tabuleiro = inicializa_listade();
+
+    // preenche o tabuleiro com a quantidade de casas que a unidade pede (10,20,30)
+    inicia_tabuleiro(tabuleiro, 20);
+
+    // popula e embaralha as cartas
+    popula_perguntas(perguntas);
+    embaralhaQuestoes(perguntas);
+
     setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
-    quant = quantidade();   // atribuição da função que lê a quantidade de jogadores para a variavel de quantidade da main
 
-   
-	
-    lerDados(quant, &jogadores); // Insere os dados dos Jogadores presentes
-    rodadaplayer(&jogadores, &perguntas, &perguntas_descartadas); // realiza uma rodada 
+    quant = quantidade(); // atribuição da quantidade de jogadores
 
+    // função para colocar os jogadores no tabuleiro
+    lerDados(quant, jogadores, tabuleiro);
 
+    rodadaplayer(jogadores, perguntas, perguntas_descartadas); // realiza uma rodada
 
-    
+    // limpar memória
+    destroi_pilha(perguntas);
+    destroi_pilha(perguntas_descartadas);
+    destroi_fila(jogadores);
+    while (!listade_vazia(tabuleiro)) {
+        remove_listade(tabuleiro, tabuleiro->ini->info.posicao);
+    }
+    free(tabuleiro);
 
     return 0;
 }
-
