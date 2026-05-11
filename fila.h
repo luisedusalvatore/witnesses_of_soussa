@@ -1,66 +1,94 @@
-#ifndef fila_h
-#define fila_h
+#ifndef FILADE_H_INCLUDED
+#define FILADE_H_INCLUDED
 #include <stdio.h>
-#include <string.h>
-#define MAX 100
+#include <stdlib.h>
+#include "tipos.h"
 
-typedef Player tp_item_f;
+typedef Player tp_item_fila;
 
-typedef struct{
-	tp_item_f item[MAX];
-	int ini, fim;
-	// int tam;
+typedef struct tp_no_fila_aux {
+  tp_item_fila info;
+  struct tp_no_fila_aux *prox;
+} tp_no_fila;
+
+typedef struct {
+  tp_no_fila *ini, *fim;
 } tp_fila;
 
-void inicializaFila(tp_fila *f){
-	f->ini = f->fim = MAX-1;
+tp_fila *inicializa_fila (){
+   tp_fila *fila = (tp_fila*) malloc(sizeof(tp_fila));
+   fila->ini = fila->fim = NULL;
+   return fila;
 }
 
-int filaVazia(tp_fila *f){
-	if(f->ini == f->fim) return 1;
-	return 0;
-}
-int proximo (int pos){
-	if(pos == MAX-1) return 0;
-	return ++pos;
+tp_no_fila *aloca_fila() {
+	return (tp_no_fila*) malloc(sizeof(tp_no_fila));
 }
 
-int filaCheia (tp_fila *f){
-	if(proximo(f->fim) == f->ini)
-		return 1;
-	return 0;
-}
-int insereFila(tp_fila *f, tp_item_f e){
-	if(filaCheia(f))
-		return 0;
-	f->fim = proximo(f->fim);
-	f->item[f->fim].posicao = e.posicao;
-	f->item[f->fim].cor = e.cor;
-	strcpy(f->item[f->fim].nome, e.nome);
-	return 1;
+int fila_vazia (tp_fila *fila){
+    return (fila->ini == NULL);
 }
 
-int removeFila (tp_fila *f, tp_item_f *e){
-	if(filaVazia(f)) return 0;
-	f->ini = proximo(f->ini);
-	e->posicao = f->item[f->ini].posicao; 
-	e->cor = f->item[f->ini].cor;
-	strcpy(e->nome, f->item[f->ini].nome);
-	return 1;
+int insere_fila (tp_fila *fila, tp_item_fila e){
+    tp_no_fila *novo = aloca_fila();
+    if(!novo) return 0;
+
+    novo->info = e;
+    novo->prox = NULL;
+
+    if(fila_vazia(fila)){
+        fila->ini = novo;
+    } else {
+        fila->fim->prox = novo;
+    }
+    fila->fim = novo;
+    return 1;
 }
 
-void imprimeFila(tp_fila f){
-	tp_item_f e;
-	while(!filaVazia(&f)){
-		removeFila(&f, &e);
-		printf("%d\n", e);
-	}
+int remove_fila (tp_fila *fila, tp_item_fila *e){
+    if (fila_vazia(fila)) return 0;
+
+    tp_no_fila *aux = fila->ini;
+    *e = aux->info;
+
+    fila->ini = aux->prox;
+
+    if (fila->ini == NULL) {
+        fila->fim = NULL;
+    }
+
+    free(aux);
+    return 1;
 }
 
-int tamanhoFila(tp_fila *f){
-	if (filaVazia(f)) return 0;
-	if (f->ini < f->fim) return f->fim - f->ini;
-	return MAX - 1 - f->ini + f->fim + 1;
+// CORREÇÃO CRÍTICA: Resolvido o Use-After-Free
+tp_fila *destroi_fila(tp_fila *fila) {
+    tp_item_fila e;
+    while (!fila_vazia(fila)) {
+        remove_fila(fila, &e);
+    }
+    free(fila);
+    return NULL;
 }
 
-#endif
+void imprime_fila(tp_fila *fila) {
+     tp_fila *fila_aux = inicializa_fila();
+     tp_item_fila e;
+
+     printf("Inicio -> [ ");
+	 while (!fila_vazia(fila)) {
+        remove_fila(fila, &e);
+        printf("%s | ", e.nome);
+        insere_fila(fila_aux, e);
+     }
+     printf("] <- Fim\n");
+
+     fila->ini = fila_aux->ini;
+     fila->fim = fila_aux->fim;
+
+     fila_aux->ini = NULL;
+     fila_aux->fim = NULL;
+     free(fila_aux);
+}
+
+#endif // FILADE_H_INCLUDED
