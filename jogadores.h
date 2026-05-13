@@ -1,5 +1,3 @@
-#ifndef jogadores_h
-#define jogadores_h
 #include <stdio.h>
 #include <string.h>
 #include "filade.h"
@@ -9,6 +7,9 @@
 #include "easteregg.h"
 #include "listade.h"
 #include "tipos.h"
+#ifndef jogadores_h
+#define jogadores_h
+
 
 void inicializa_posicao(Player *jogador, tp_listade *inicio){
     // define a posição de todos os jogadores no tabuleiro como o início
