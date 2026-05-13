@@ -34,6 +34,33 @@ void popula_perguntas(tp_pilha *pilha){
         '3',
         '1',
     };
+void popula_perguntas_m(tp_pilha *pilha){
+    int tam = 10;
+    char perguntas[10][300] = {
+        "qual o elemento de uma lista que é utilizado para identificar o fim dela? (end(1), /0(2), return 0(3), null(4))",
+        "no pior caso, o algoritimo bubble tem uma complexidade maior que o merge sort (V/F)",
+        "Em uma lista simplesmente encadeada, cada nó contém um ponteiro para o nó anterior. V/F",
+        "Qual a principal vantagem de uma lista duplamente encadeada em relação à simples? (menor uso de memória (1)/ percorrer em ambos os sentidos (2)/ busca binária direta (3)/ não usa ponteiros(4))",
+        "Qual a complexidade de espaço (O) para o algoritmo bubble sort no melhor caso? (O(1) (1)/ O(n) (2)/ O(log\ n) (3)/ O(n^2) (4))",
+        "Para remover o último elemento de uma lista simplesmente encadeada, é necessário percorrer toda a lista até o penúltimo nó. V/F",
+        "Na notação O, qual destas complexidades representa um algoritmo que ocupa mais espaço? (O(n) (1)/ O(n log\ n) (2)/ O(n^2) (3)/ O(log\ n) (4))",
+        "Em uma lista duplamente encadeada, qual o valor do ponteiro (anterior) do primeiro nó (head) e do ponteiro (próximo) do último nó (tail)? (0 e 1 (1)/ nulo e nulo (2)/ nulo e head (3)/ tail e nulo(4))",
+        "Normalmente, a complexidade de tempo é maior que a do espaço (V/F)",
+        "Em uma lista encadeada circular, o ponteiro *prox do último nó aponta para: (nulo (1)/ (2)/ primeiro nó (3)/ penúltimo nó(4))"
+    };
+    char respostas[10] = {
+        '4',
+        'V',
+        'F',
+        '2',
+        '2',
+        'V',
+        '3',
+        '4',
+        'F',
+        '3',
+    };
+}
     tp_pergunta questoes;
     for(int i = 0; i < tam; i++){
         strcpy(questoes.enunciado, perguntas[i]);
