@@ -34,6 +34,7 @@ void popula_perguntas(tp_pilha *pilha){
         '3',
         '1',
     };
+}
 void popula_perguntas_m(tp_pilha *pilha){
     int tam = 10;
     char perguntas[10][300] = {
@@ -60,7 +61,7 @@ void popula_perguntas_m(tp_pilha *pilha){
         'F',
         '3',
     };
-}
+
     tp_pergunta questoes;
     for(int i = 0; i < tam; i++){
         strcpy(questoes.enunciado, perguntas[i]);
