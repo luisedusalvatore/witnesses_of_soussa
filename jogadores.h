@@ -153,25 +153,25 @@ void rodadaplayer(tp_fila *jogadores, tp_pilha *perguntas_faceis, tp_pilha *perg
     remove_fila(jogadores, &jogador);
     printf("Vez de %s\n", jogador.nome);
 
-    if(jogador->posicao <= 10){
+    if(jogador.posicao->info.posicao <= 10){
         resposta = geraPergunta(perguntas_faceis, perguntas_faceis_descartadas);
         if(resposta == 1) {
             printf("Você acertou!")
             move_posicao(&jogador, rola_dados());
         }    
         else{
-            printf("Voce errou! Retorne uma casa")
+            printf("Voce errou! Retorne uma casa\n");
             move_posicao(&jogador, -1);
         }   
     }
-    if(jogador->posicao > 10){
+    if(jogador.posicao->info.posicao > 10){
         resposta = geraPergunta(perguntas_medias, perguntas_medias_descartadas);
         if(resposta == 1) {
             printf("Você acertou!")
             move_posicao(&jogador, rola_dados());
         }    
         else{
-            printf("Voce errou! Retorne duas casas")
+            printf("Voce errou! Retorne duas casas\n");
             move_posicao(&jogador, -2);
         }   
     }
