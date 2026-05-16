@@ -19,14 +19,14 @@ int eh_fibo(int posi){
     return 1;
 }
 
-int tem_carta(int posi){
-    if(eh_primo(posi)) return 1;
-    if(eh_binario(posi)) return 1;
-    if(eh_fibo(posi)) return 1;
+int tem_carta(int posi){ // Define se tem carta e as dificuldades para cada caso
+    if(eh_primo(posi)) return 2; // Casa de numero primo são questões médias
+    if(eh_binario(posi)) return 3; // Casas com números binário são questões dificeis
+    if(eh_fibo(posi)) return 1; // Casa de fibonacci sao questões fáceis
     return 0;
 }
 
-int inicia_tabuleiro(tp_listade *tabuleiro, int tam){
+int inicia_tabuleiro(tp_listade *tabuleiro, int tam){ // Inicia o tabuleiro, marcando as casas que terão cartas
     for(int i = 0; i < tam; i++){
         insere_listade_no_fim(tabuleiro, i+1, tem_carta(i+1));
     }
