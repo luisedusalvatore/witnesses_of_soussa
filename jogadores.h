@@ -146,19 +146,38 @@ int move_posicao(Player *jogador, int posi){
     return 0;
 }
 
-void rodadaplayer(tp_fila *jogadores, tp_pilha *perguntas, tp_pilha *perguntas_descartadas){
+void rodadaplayer(tp_fila *jogadores, tp_pilha *perguntas_faceis, tp_pilha *perguntas_medias, tp_pilha *perguntas_faceis_descartadas, tp_pilha *perguntas_medias_descartadas){
     int resposta;
     Player jogador;
 
     remove_fila(jogadores, &jogador);
     printf("Vez de %s\n", jogador.nome);
 
-    resposta = geraPergunta(perguntas, perguntas_descartadas);
-    if(resposta == 1) move_posicao(&jogador, rola_dados());
-    else{
-        move_posicao(&jogador, -3);
+    if(jogador->posicao <= 10){
+        resposta = geraPergunta(perguntas_faceis, perguntas_faceis_descartadas);
+        if(resposta == 1) {
+            printf("Você acertou!")
+            move_posicao(&jogador, rola_dados());
+        }    
+        else{
+            printf("Voce errou! Retorne uma casa")
+            move_posicao(&jogador, -1);
+        }   
+    }
+    if(jogador->posicao > 10){
+        resposta = geraPergunta(perguntas_medias, perguntas_medias_descartadas);
+        if(resposta == 1) {
+            printf("Você acertou!")
+            move_posicao(&jogador, rola_dados());
+        }    
+        else{
+            printf("Voce errou! Retorne duas casas")
+            move_posicao(&jogador, -2);
+        }   
     }
 
+
+    
     insere_fila(jogadores, jogador);
 }
 

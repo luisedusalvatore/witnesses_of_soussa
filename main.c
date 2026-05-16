@@ -19,14 +19,16 @@ int main(){
     int quant;         // quantidade de jogadores
 
     // declaração da pilha,  fila e lista dinamicas
-    tp_pilha *perguntas;
-    tp_pilha *perguntas_descartadas;
+    tp_pilha *perguntas_faceis, *perguntas_medias;
+    tp_pilha *perguntas_faceis_descartadas, *perguntas_medias_descartadas;
     tp_fila *jogadores;
     tp_listade *tabuleiro;
 
     // inicialização das estruturas dinamicas
-    perguntas = inicializa_pilha();
-    perguntas_descartadas = inicializa_pilha();
+    perguntas_faceis = inicializa_pilha();
+    perguntas_medias = inicializa_pilha();
+    perguntas_faceis_descartadas = inicializa_pilha();
+    perguntas_medias_descartadas = inicializa_pilha();
     jogadores = inicializa_fila();
     tabuleiro = inicializa_listade();
 
@@ -34,8 +36,10 @@ int main(){
     inicia_tabuleiro(tabuleiro, 20);
 
     // popula e embaralha as cartas
-    popula_perguntas(perguntas);
-    embaralhaQuestoes(perguntas);
+    popula_perguntas(perguntas_faceis);
+    embaralhaQuestoes(perguntas_faceis);
+    popula_perguntas_m(perguntas_medias);
+    embaralhaQuestoes(perguntas_medias);
 
     setlocale(LC_ALL, "Portuguese"); // função responsável por adicionar caracteres do PT-BR
 
@@ -44,7 +48,7 @@ int main(){
     // função para colocar os jogadores no tabuleiro
     lerDados(quant, jogadores, tabuleiro);
 
-    rodadaplayer(jogadores, perguntas, perguntas_descartadas); // realiza uma rodada
+    rodadaplayer(jogadores, perguntas_faceis, perguntas_medias, perguntas_faceis_descartadas, perguntas_medias_descartadas); // realiza uma rodada
 
     // limpar memória
     destroi_pilha(perguntas);
