@@ -19,10 +19,10 @@ int eh_fibo(int posi){
     return 1;
 }
 
-int tem_carta(int posi){ // Define se tem carta e as dificuldades para cada caso
-    if(eh_primo(posi)) return 2; // Casa de numero primo são questões médias
-    if(eh_binario(posi)) return 3; // Casas com números binário são questões dificeis
-    if(eh_fibo(posi)) return 1; // Casa de fibonacci sao questões fáceis
+int tem_carta(int posi){ // Define se a casa vai ter carta
+    if(eh_primo(posi)) return 1; // Casa de numeros primos
+    if(eh_binario(posi)) return 1; // Casas com números binários
+    if(eh_fibo(posi)) return 1; // Casa de fibonacci
     return 0;
 }
 
