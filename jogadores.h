@@ -156,7 +156,7 @@ void rodadaplayer(tp_fila *jogadores, tp_pilha *perguntas_faceis, tp_pilha *perg
     if(jogador.posicao->info.posicao <= 10){
         resposta = geraPergunta(perguntas_faceis, perguntas_faceis_descartadas);
         if(resposta == 1) {
-            printf("Você acertou!")
+            printf("Você acertou!");
             move_posicao(&jogador, rola_dados());
         }    
         else{
@@ -167,7 +167,7 @@ void rodadaplayer(tp_fila *jogadores, tp_pilha *perguntas_faceis, tp_pilha *perg
     if(jogador.posicao->info.posicao > 10){
         resposta = geraPergunta(perguntas_medias, perguntas_medias_descartadas);
         if(resposta == 1) {
-            printf("Você acertou!")
+            printf("Você acertou!");
             move_posicao(&jogador, rola_dados());
         }    
         else{
