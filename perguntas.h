@@ -8,6 +8,7 @@
 #include "pilhade.h"
 #include "tipos.h"
 
+// preenche a pilha dinâmica com o banco de dados de perguntas fáceis
 void popula_perguntas(tp_pilha *pilha){
     int tam = 10;
     char perguntas[10][300] = {
@@ -22,19 +23,26 @@ void popula_perguntas(tp_pilha *pilha){
         "Em qual dos casos se faz necessario utilizar '->' ao inves de '*'? pilha(1) ponteiro(2) struct(3) string(4)",
         "Qual o especificador utilizado para imprimir uma fila contendo uma sequencia de caracteres? %%s(1) %%c(2) %%d(3) %%f(4)"
     };
+
+    // gabarito
+    // a lógica de relacionamento se dá pelo índice: respostas[i] sempre será o gabarito de perguntas[i]
     char respostas[10] = {
-        'F',
-        'V',
-        '4',
-        '3',
-        '2',
-        '3',
-        '2',
-        '4',
-        '3',
-        '1',
+        'F', 'V', '4', '3', '2', '3', '2', '4', '3', '1'
     };
+
+    tp_pergunta questoes; // struct temporária para empacotar os dados antes de empilhar
+
+    //  empilhar cada questão
+    for(int i = 0; i < tam; i++){
+        strcpy(questoes.enunciado, perguntas[i]);
+        questoes.resposta = respostas[i];
+
+        // insere a struct montada no topo da pilha dinâmica
+        push(pilha, questoes);
+    }
 }
+
+// preenche a pilha dinâmica com o banco de dados de perguntas médias
 void popula_perguntas_m(tp_pilha *pilha){
     int tam = 10;
     char perguntas[10][300] = {
@@ -49,6 +57,8 @@ void popula_perguntas_m(tp_pilha *pilha){
         "Normalmente, a complexidade de tempo é maior que a do espaço (V/F)",
         "Em uma lista encadeada circular, o ponteiro *prox do último nó aponta para: (nulo (1)/ (2)/ primeiro nó (3)/ penúltimo nó(4))"
     };
+    // gabarito
+    // a lógica de relacionamento se dá pelo índice: respostas[i] sempre será o gabarito de perguntas[i]
     char respostas[10] = {
         '4',
         'V',
@@ -57,16 +67,17 @@ void popula_perguntas_m(tp_pilha *pilha){
         '2',
         'V',
         '3',
-        '4',
+        '2',
         'F',
         '3',
     };
 
-    tp_pergunta questoes;
+    tp_pergunta questoes; // struct temporária para empacotar os dados antes de empilhar
+    //  empilhar cada questão
     for(int i = 0; i < tam; i++){
         strcpy(questoes.enunciado, perguntas[i]);
         questoes.resposta = respostas[i];
-        push(pilha, questoes);
+        push(pilha, questoes);  // insere a struct montada no topo da pilha dinâmica
     }
 }
 
@@ -124,6 +135,9 @@ int geraPergunta(tp_pilha *perguntas, tp_pilha *perguntas_descartadas){
     pop(perguntas, &e);
     printf("\n%s\nSua resposta: ", e.enunciado);
     scanf(" %c", &alternativa_selecionada);
+
+    // limpar o buffer do teclado
+    while (getchar() != '\n' && !feof(stdin));
 
     if (e.resposta == toupper(alternativa_selecionada))
         return 1;
