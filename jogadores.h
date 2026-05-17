@@ -151,7 +151,7 @@ void lerDados(int quant, tp_fila *jogadores, tp_listade *tabuleiro){
             if(confirmCor == 1){    // caso o tabuleiro não tenha sido criado
                 jogador.cor = corAux;   // salva a cor escolhida na struct do jogador
                 if (tabuleiro->ini != NULL) { // caso o tabuleiro esteja vazio
-                    tabuleiro->ini->info.cor[confirmCor - 1] = 1;
+                    tabuleiro->ini->info.cor[corAux - 1] = 1;
                 }
                 printf("Cor atribuida com sucesso ao jogador %s!\n", jogador.nome);
             }
