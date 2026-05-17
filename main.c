@@ -48,6 +48,8 @@ int main(){
     // função para colocar os jogadores no tabuleiro
     lerDados(quant, jogadores, tabuleiro);
 
+    while (getchar() != '\n' && !feof(stdin));
+
     //  Loop do jogo
     int fim_de_jogo = 0;
     while (!fim_de_jogo) {
