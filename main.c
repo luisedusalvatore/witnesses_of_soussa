@@ -32,7 +32,7 @@ int main(){
     jogadores = inicializa_fila();
     tabuleiro = inicializa_listade();
 
-    // preenche o tabuleiro com a quantidade de casas que a unidade pede (10,20,30)
+    // preenche o tabuleiro com a quantidade de casas que decidirmos por no jogo
     inicia_tabuleiro(tabuleiro, 20);
 
     // popula e embaralha as cartas
@@ -51,8 +51,10 @@ int main(){
     rodadaplayer(jogadores, perguntas_faceis, perguntas_medias, perguntas_faceis_descartadas, perguntas_medias_descartadas); // realiza uma rodada
 
     // limpar memória
-    destroi_pilha(perguntas);
-    destroi_pilha(perguntas_descartadas);
+    destroi_pilha(perguntas_faceis);
+    destroi_pilha(perguntas_faceis_descartadas);
+    destroi_pilha(perguntas_medias);
+    destroi_pilha(perguntas_medias_descartadas);
     destroi_fila(jogadores);
     while (!listade_vazia(tabuleiro)) {
         remove_listade(tabuleiro, tabuleiro->ini->info.posicao);
