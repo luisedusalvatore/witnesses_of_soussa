@@ -48,9 +48,20 @@ int main(){
     // função para colocar os jogadores no tabuleiro
     lerDados(quant, jogadores, tabuleiro);
 
-    rodadaplayer(jogadores, perguntas_faceis, perguntas_medias, perguntas_faceis_descartadas, perguntas_medias_descartadas); // realiza uma rodada
+    //  Loop do jogo
+    int fim_de_jogo = 0;
+    while (!fim_de_jogo) {
+        system("cls");
 
-    // limpar memória
+        fim_de_jogo = rodadaplayer(jogadores, tabuleiro, perguntas_faceis, perguntas_medias, perguntas_faceis_descartadas, perguntas_medias_descartadas);
+
+        if (!fim_de_jogo) {
+            printf("\nPressione ENTER para passar a vez...");
+            getchar();
+        }
+    }
+
+    // processo de limpar memoria
     destroi_pilha(perguntas_faceis);
     destroi_pilha(perguntas_faceis_descartadas);
     destroi_pilha(perguntas_medias);
