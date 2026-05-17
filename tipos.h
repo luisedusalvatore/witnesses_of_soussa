@@ -21,13 +21,21 @@ typedef struct {
     tp_no *fim;
 } tp_listade;
 
-typedef struct{		// struct de jogadores
-
-    char nome[25];
+typedef struct {
+    char nome[100];
     int cor;
     tp_no *posicao;
 
-}Player;
+    // sistema de inventario
+    int inventario[3]; // guarda os IDs dos itens
+    int qtd_itens;
+
+    // status do jogador
+    int status_rerol;
+    int status_imune;        // 1 se usou "Imunidade à resenha", 0 normal
+    int status_castigo;      // 1 se foi alvo do "Castigo", 0 normal
+    int status_tudo_nada;    // 1 se ativou o "Tudo ou nada", 0 normal
+} Player;
 
 typedef struct{
 
