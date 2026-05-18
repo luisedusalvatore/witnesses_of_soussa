@@ -464,7 +464,7 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
     system("cls"); // limpa a tela para dar a ilusão de animação
     imprime_tabuleiro_visual(tabuleiro);
 
-    printf("\n>>> %s rolou o dado e avancou para a Casa %d! <<<\n", jogador.nome, jogador.posicao->info.posicao);
+    printf("\n>>> %s tirou %d no dado e avancou para a Casa %d! <<<\n", jogador.nome, valor_dado, jogador.posicao->info.posicao);
 
     if (venceu == 1) {
         printf("\n>>> PARABENS! %s ALCANCOU A CHEGADA E VENCEU O JOGO! <<<\n", jogador.nome);
