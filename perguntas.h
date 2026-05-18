@@ -146,3 +146,4 @@ int geraPergunta(tp_pilha *perguntas, tp_pilha *perguntas_descartadas){
 }
 
 #endif
+
