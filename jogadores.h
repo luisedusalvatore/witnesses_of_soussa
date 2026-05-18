@@ -134,18 +134,18 @@ void lerDados(int quant, tp_fila *jogadores, tp_listade *tabuleiro){
         printf("   CADASTRANDO JOGADOR %d\n", i + 1);
         printf("=============================\n");
 
-        // Loop para garantir um nome dentro do limite e ÚNICO
+        // Loop para garantir um nome dentro do limite e único
         do{
             printf("\t\nQual o nome do jogador %d?\n", i+1);
 
             scanf(" %30[^\n]", nomeAux);
             getchar();  // limpa o '\n' que o scanf deixa no buffer
 
-            // Passamos o nomeAux, o vetor de bloqueio e o índice 'i' (quantos já cadastraram)
+            // passamos o nomeAux, o vetor de bloqueio e o índice 'i'
             confirmNome = verificarNome(nomeAux, nomes_usados, i);
 
             if (confirmNome == 1){
-                // Nome aceito! Copia para o jogador e salva no vetor de bloqueio
+                // copia para o jogador e salva no vetor de bloqueio
                 strcpy(jogador.nome, nomeAux);
                 strcpy(nomes_usados[i], nomeAux); // Registra que esse nome já é de alguém
 
@@ -562,3 +562,4 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
 }
 
 #endif
+
