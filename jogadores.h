@@ -56,11 +56,21 @@ int quantidade(){
     return quant_players; // se a entrada for valida e passou pelos processos de verificação, a função retorna a quantidade de jogadores
 }
 
-int verificarNome(char *nome){
-    if(strlen(nome) >= 20)
-        return 0;   // inválido
-    else
-        return 1;   // válido
+// valida o tamanho do nome e impede que dois jogadores usem o mesmo apelido
+int verificarNome(char *nome, char nomes_usados[][100], int qtd_cadastrados){
+    // verifica se estourou o limite de caracteres
+    if(strlen(nome) >= 30)
+        return 0;   // Erro 0: Inválido pelo tamanho
+
+    // percorre a lista de nomes já cadastrados até o momento
+    for(int i = 0; i < qtd_cadastrados; i++) {
+
+        if(strcmp(nome, nomes_usados[i]) == 0) {
+            return 2; // inválido por ser repetido
+        }
+    }
+
+    return 1;   // Sucesso: Nome é válido e único
 }
 
 int verificarCor(int corAux, int cor_usada[]){
@@ -109,34 +119,45 @@ void lerDados(int quant, tp_fila *jogadores, tp_listade *tabuleiro){
     int confirmNome, confirmCor;
     char nomeAux[99];
     int corAux;
-    // vetor de controle para evitar que duas pessoas escolham a mesma cor
+
+    // Vetores de controle para evitar escolhas duplicadas
     int cores_usadas[4] = {0,0,0,0};
+    char nomes_usados[4][100]; // <-- NOVO: Matriz para guardar os nomes
 
     for(i = 0; i < quant; i++) {
         Player jogador;
-        // coloca o ponteiro de posição do jogador na primeira casa do tabuleiro
+
+        // Coloca o ponteiro de posição do jogador na primeira casa do tabuleiro
         inicializa_posicao(&jogador, tabuleiro);
 
         printf("\n=============================\n");
         printf("   CADASTRANDO JOGADOR %d\n", i + 1);
         printf("=============================\n");
 
-        // loop para garantir que o usuário digite um nome dentro do limite
+        // Loop para garantir um nome dentro do limite e ÚNICO
         do{
             printf("\t\nQual o nome do jogador %d?\n", i+1);
 
-            // lê até 30 caracteres permitindo espaços. O [^\n] faz a leitura parar apenas no 'Enter'
             scanf(" %30[^\n]", nomeAux);
-            getchar();  // limpa o '\n' que o scanf deixa no buffer do teclado
+            getchar();  // limpa o '\n' que o scanf deixa no buffer
 
-            confirmNome = verificarNome(nomeAux);
+            // Passamos o nomeAux, o vetor de bloqueio e o índice 'i' (quantos já cadastraram)
+            confirmNome = verificarNome(nomeAux, nomes_usados, i);
+
             if (confirmNome == 1){
+                // Nome aceito! Copia para o jogador e salva no vetor de bloqueio
                 strcpy(jogador.nome, nomeAux);
+                strcpy(nomes_usados[i], nomeAux); // Registra que esse nome já é de alguém
+
                 // sousaEasterEgg(jogador.nome); // em manutenção
             }
-            else
-                printf("[ERRO] Limite de 30 caracteres excedido. Tente novamente.\n");
-        }while(confirmNome!=1);
+            else if (confirmNome == 2) {
+                printf("[ERRO] Esse nome ja esta em uso por outro jogador! Escolha outro.\\n");
+            }
+            else {
+                printf("[ERRO] Limite de 30 caracteres excedido. Tente novamente.\\n");
+            }
+        }while(confirmNome != 1);
 
         // loop para garantir que o jogador escolha uma cor válida e que não esteja em uso
         do{
