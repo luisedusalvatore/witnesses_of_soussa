@@ -5,13 +5,8 @@
 
 int rola_dados(){
     int valor;
-<<<<<<< HEAD
     valor = (rand()%(6))+1; // gera um valor aleatorio entre 1 e 6
     printf("Numero rolado: %d", valor);
-=======
-    valor = (rand()%(6))+1;
-    printf("Numero rolado: %d\n", valor);
->>>>>>> e8ba0ef799e9e853021b36c00d8947cd6d620f1c
     return valor;
 }
 

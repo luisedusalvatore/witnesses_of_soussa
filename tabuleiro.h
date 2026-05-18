@@ -6,7 +6,6 @@
 #include "pilhade.h"
 
 int eh_primo(int posi){
-<<<<<<< HEAD
     // implementar lógica que verifica se o número da casa é primo
     for (int i = 2; i < posi; i++){
         if (posi % i != 0) return 0;
@@ -87,11 +86,6 @@ int tem_carta(int posi){ // Define se a casa vai ter carta
 int inicia_tabuleiro(tp_listade *tabuleiro, int tam){ // Inicia o tabuleiro, marcando as casas que terão cartas
     for(int i = 0; i < tam; i++){
         insere_listade_no_fim(tabuleiro, i+1, tem_carta(i+1));
-=======
-    if (posi <= 1) return 0;
-    for (int i = 2; i * i <= posi; i++) {
-        if (posi % i == 0) return 0;
->>>>>>> e8ba0ef799e9e853021b36c00d8947cd6d620f1c
     }
     return 1;
 }
