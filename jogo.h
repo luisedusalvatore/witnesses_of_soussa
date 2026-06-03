@@ -14,7 +14,7 @@
 #include "listade.h"
 #include "tabuleiro.h"
 
-int main(){
+int roda_jogo(){
     srand(time(NULL)); // gera a seed para os numeros aleatorios
     int quant;         // quantidade de jogadores
 

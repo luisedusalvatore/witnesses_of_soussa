@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "jogo.h"
 #include <math.h>
 // baixem a versão 4.2 do raylib pfv
 // --------------------------------------------------------------------------
