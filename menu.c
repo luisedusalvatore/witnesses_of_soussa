@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "jogo.h"
 #include <math.h>
+#include "soundsfx.h"
 // baixem a versão 4.2 do raylib pfv
 // --------------------------------------------------------------------------
 // DEFINIÇÕES E ESTRUTURAS
@@ -72,6 +73,9 @@ int main(void) {
     Font fonteOffbit = LoadFontEx("offbit.ttf", 80, 0, 250);
     SetTargetFPS(60);
 
+    InitAudioSystem();
+    PlayMusicTrack(0);
+
     TelaAtual tela = TELA_MENU;
     Corredor corredores[NUM_CORREDORES];
     Estrela estrelas[NUM_ESTRELAS];
@@ -123,7 +127,8 @@ int main(void) {
     };
     int totalLinhasCreditos = 25;
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose()) {   
+
         int larguraAtual = GetScreenWidth();
         int alturaAtual = GetScreenHeight();
         float escala = (float)alturaAtual / 600.0f;
@@ -258,6 +263,26 @@ int main(void) {
         if (tela != TELA_CREDITOS) {
             creditosY = alturaAtual;
         }
+
+        // --------------------------------------------------------------------------
+        // LÓGICA DE MUSICAS
+        // --------------------------------------------------------------------------
+        
+        static TelaAtual telaAnterior = (TelaAtual)-1; // Valor inicial inválido para forçar a primeira musica
+
+            if (tela != telaAnterior) {
+                if (tela == TELA_MENU) {
+                    PlayMusicTrack(0); // Toca música do Menu
+                } 
+                else if (tela == TELA_CREDITOS) {
+                    PlayMusicTrack(1); // Toca música dos Créditos
+                }
+                
+                telaAnterior = tela; // Atualiza o estado da tela
+            }
+
+            UpdateAudioSystem(); // Continua atualizando o stream
+ 
 
         // ----------------------------------------------------------------------
         // LÓGICA DE RENDERIZAÇÃO (Draw)
@@ -433,6 +458,7 @@ int main(void) {
         EndDrawing();
     }
 
+    CloseAudioSystem();
     UnloadFont(fonteOffbit);
     CloseWindow();
     return 0;
