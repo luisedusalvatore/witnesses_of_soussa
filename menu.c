@@ -268,10 +268,10 @@ int main(void) {
         // LÓGICA DE MUSICAS
         // --------------------------------------------------------------------------
         
-        static TelaAtual telaAnterior = (TelaAtual)-1; // Valor inicial inválido para forçar a primeira musica
+        static TelaAtual telaAnterior = (TelaAtual)-1; // identifica qual era a tela anterior para mudar as musicas do menu
 
             if (tela != telaAnterior) {
-                if (tela == TELA_MENU) {
+                if (tela == TELA_MENU && telaAnterior == TELA_CREDITOS) {
                     PlayMusicTrack(0); // Toca música do Menu
                 } 
                 else if (tela == TELA_CREDITOS) {
