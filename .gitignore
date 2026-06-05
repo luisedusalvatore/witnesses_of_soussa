@@ -1,2 +1,5 @@
 .vscode/tasks.json
 .vscode/c_cpp_properties.json
+menu.exe
+main.exe
+output/
