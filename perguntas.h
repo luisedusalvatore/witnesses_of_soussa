@@ -10,6 +10,7 @@
 
 // preenche a pilha dinâmica com o banco de dados de perguntas fáceis
 void popula_perguntas(tp_pilha *pilha){
+
     int tam = 10;
     char perguntas[10][300] = {
         "As pilhas sao uma struct que retornam o primeiro dado inserido? V/F",
@@ -36,6 +37,7 @@ void popula_perguntas(tp_pilha *pilha){
     for(int i = 0; i < tam; i++){
         strcpy(questoes.enunciado, perguntas[i]);
         questoes.resposta = respostas[i];
+        questoes.id = i;
 
         // insere a struct montada no topo da pilha dinâmica
         push(pilha, questoes);
@@ -44,6 +46,7 @@ void popula_perguntas(tp_pilha *pilha){
 
 // preenche a pilha dinâmica com o banco de dados de perguntas médias
 void popula_perguntas_m(tp_pilha *pilha){
+    char dificuldade = 'm';
     int tam = 10;
     char perguntas[10][300] = {
         "qual o elemento de uma lista que é utilizado para identificar o fim dela? (end(1), /0(2), return 0(3), null(4))",
@@ -77,6 +80,7 @@ void popula_perguntas_m(tp_pilha *pilha){
     for(int i = 0; i < tam; i++){
         strcpy(questoes.enunciado, perguntas[i]);
         questoes.resposta = respostas[i];
+        questoes.id = i + 10;
         push(pilha, questoes);  // insere a struct montada no topo da pilha dinâmica
     }
 }
