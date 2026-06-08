@@ -38,9 +38,15 @@ typedef struct {
 } Player;
 
 typedef struct{
-
+    int id;
     char enunciado[300];
     char resposta;
 } tp_pergunta;
 
+typedef struct {
+    int acertos;
+    int erros;
+    int score;
+    char nome[50];
+} tp_hank;
 # endif
