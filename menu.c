@@ -125,7 +125,7 @@ int main(void) {
         "Instituição:",
         "SENAI CIMATEC - SALVADOR - BAHIA"
     };
-    int totalLinhasCreditos = 25;
+    int totalLinhasCreditos = 24;
 
     while (!WindowShouldClose()) {   
 
