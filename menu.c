@@ -105,7 +105,7 @@ int main(void) {
         "By: Testemunhas de Soussa",
         "",
         "Desenvolvedores:",
-        "Luís Eduardo de Jesus Peres de Oliveira Salvatore",
+        "Luis Eduardo de Jesus Peres de Oliveira Salvatore",
         "Eduardo Costa Bloisi",
         "Lucas Monteiro de Lima",
         "Carlos Monteiro Neto",
