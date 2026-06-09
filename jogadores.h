@@ -234,6 +234,17 @@ int move_posicao(Player *jogador, int posi){
     return 0;   // informa que o jogo deve continuar
 }
 
+void atualiza_hank(Player *jogador, int pontos){
+    if(pontos > 0){
+        jogador->dados.acertos ++;
+        jogador->dados.score += pontos;
+    }
+    else{
+        jogador->dados.erros ++;
+        if(jogador->dados.score + pontos >= 0) jogador->dados.score += pontos;
+    }
+}
+
 int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_faceis, tp_pilha *perguntas_medias, tp_pilha *perguntas_faceis_descartadas, tp_pilha *perguntas_medias_descartadas){
     Player jogador;
     int venceu = 0;
@@ -503,9 +514,11 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
             resposta = geraPergunta(perguntas_faceis, perguntas_faceis_descartadas);
             if (resposta == 1) {
                 printf("Voce acertou! Bonus: Avance 1 casa extra.\n");
+                atualiza_hank(&jogador, 10);
                 venceu = move_posicao(&jogador, 1);
             } else {
                 printf("Voce errou! Penalidade: Volte 1 casa.\n");
+                atualiza_hank(&jogador, -10);
                 move_posicao(&jogador, -1);
             }
         }
@@ -514,9 +527,11 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
             resposta = geraPergunta(perguntas_medias, perguntas_medias_descartadas);
             if (resposta == 1) {
                 printf("Voce acertou! Bonus: Avance 2 casas extras.\n");
+                atualiza_hank(&jogador, 20);
                 venceu = move_posicao(&jogador, 2);
             } else {
                 printf("Voce errou! Penalidade: Volte 2 casas.\n");
+                atualiza_hank(&jogador, -20);
                 move_posicao(&jogador, -2);
             }
         }
