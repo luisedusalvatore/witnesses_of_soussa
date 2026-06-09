@@ -25,6 +25,7 @@ typedef struct {
     char nome[100];
     int cor;
     tp_no *posicao;
+    tp_hank dados;
 
     // sistema de inventario
     int inventario[3]; // guarda os IDs dos itens
