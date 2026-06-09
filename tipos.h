@@ -22,6 +22,13 @@ typedef struct {
 } tp_listade;
 
 typedef struct {
+    int acertos;
+    int erros;
+    int score;
+    char nome[50];
+} tp_hank;
+
+typedef struct {
     char nome[100];
     int cor;
     tp_no *posicao;
@@ -44,10 +51,5 @@ typedef struct{
     char resposta;
 } tp_pergunta;
 
-typedef struct {
-    int acertos;
-    int erros;
-    int score;
-    char nome[50];
-} tp_hank;
+
 # endif
