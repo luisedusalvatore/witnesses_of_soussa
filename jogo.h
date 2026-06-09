@@ -13,8 +13,12 @@
 #include "jogadores.h"
 #include "listade.h"
 #include "tabuleiro.h"
+#include "hank.h"
 
 int roda_jogo(){
+    FILE *arquivo;
+    tp_arvore arvore;
+    *arquivo = carrega_hank(&arvore);
     srand(time(NULL)); // gera a seed para os numeros aleatorios
     int quant;         // quantidade de jogadores
 
@@ -62,17 +66,22 @@ int roda_jogo(){
             getchar();
         }
     }
-
+    Player *e;
     // processo de limpar memoria
     destroi_pilha(perguntas_faceis);
     destroi_pilha(perguntas_faceis_descartadas);
     destroi_pilha(perguntas_medias);
     destroi_pilha(perguntas_medias_descartadas);
+    while(!fila_vazia(jogadores)){
+        remove_fila(jogadores, e);
+        salva_hank(arquivo, e->dados);
+    }
     destroi_fila(jogadores);
     while (!listade_vazia(tabuleiro)) {
         remove_listade(tabuleiro, tabuleiro->ini->info.posicao);
     }
     free(tabuleiro);
+    fclose(arquivo);
 
     return 0;
 }
