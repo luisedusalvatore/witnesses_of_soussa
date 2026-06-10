@@ -45,7 +45,7 @@ int insere_fila (tp_fila *fila, tp_item_fila e){
     return 1;
 }
 
-int remove_fila (tp_fila *fila, tp_item_fila *e){
+int remove_fila (tp_fila *fila, tp_item_fila *e){ // Vai ter que mexer nisso aqui depois
     if (fila_vazia(fila)) return 0;
 
     tp_no_fila *aux = fila->ini;
