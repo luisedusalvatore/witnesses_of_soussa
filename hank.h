@@ -1,9 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "arvore.h"
 #include "tipos.h"
 #ifndef hank_h
 #define hank_h
+
+int inicializa_hank(Player *jogador){
+    jogador->dados.acertos = 0;
+    jogador->dados.erros = 0;
+    jogador->dados.score = 0;
+    strcpy(jogador->nome, jogador->dados.nome);
+    return 1;
+}
 
 FILE carrega_hank(tp_arvore *arvore){
     *arvore = inicializa_arvore();
