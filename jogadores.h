@@ -192,7 +192,7 @@ void lerDados(int quant, tp_fila *jogadores, tp_listade *tabuleiro){
         for(int j = 0; j < 3; j++) {
             jogador.inventario[j] = 0;
         }
-
+        inicializa_hank(&jogador);
         insere_fila(jogadores, jogador);
         printf("\n>>> Jogador %d adicionado com sucesso! <<<\n", i + 1);
     }
