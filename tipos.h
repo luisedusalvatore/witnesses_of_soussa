@@ -25,7 +25,7 @@ typedef struct {
     int acertos;
     int erros;
     int score;
-    char nome[50];
+    char nome[100];
 } tp_hank;
 
 typedef struct {
