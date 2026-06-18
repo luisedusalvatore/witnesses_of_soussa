@@ -21,7 +21,7 @@ static void PlayMusicTrack(int trackIndex) {
     if (musica_atual != NULL) StopMusicStream(*musica_atual);
 
     // Define qual será a nova baseando-se no índice
-    
+
     switch(trackIndex){
         case 0:
             musica_atual = &musica_menu_principal;
@@ -30,7 +30,7 @@ static void PlayMusicTrack(int trackIndex) {
             musica_atual = &musica_creditos;
             break;
 
-    }    
+    }
     // Inicia a reprodução da nova música
     PlayMusicStream(*musica_atual);
 }
@@ -48,4 +48,3 @@ static void CloseAudioSystem() {
 }
 
 #endif
-
