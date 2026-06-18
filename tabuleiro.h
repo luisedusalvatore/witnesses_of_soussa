@@ -16,7 +16,7 @@ int eh_primo(int posi){
 
 int eh_binario(int posi){
     // implementar lógica que verifica se o número da casa é um palindromo em binário
-    char vetor[30]; 
+    char vetor[30];
     int tam = 0;
     tp_pilha *pilha = inicializa_pilha();
 	tp_item_pilha e;
@@ -25,9 +25,9 @@ int eh_binario(int posi){
         vetor[tam++] = '0';
     } else {
         while (posi > 0) {
-            
-            vetor[tam++] = (posi % 2) + '0'; 
-            posi = posi / 2;            
+
+            vetor[tam++] = (posi % 2) + '0';
+            posi = posi / 2;
         }
     }
 
@@ -39,15 +39,15 @@ int eh_binario(int posi){
     }
 
    // compara com o vetor
-    int eh_palindromo = 1; 
+    int eh_palindromo = 1;
 
     for (int i = 0; i < tam; i++) {
-        
-        pop(pilha, &e); 
+
+        pop(pilha, &e);
 
         if (vetor[i] != e.resposta) {
             eh_palindromo = 0; // Não é um palíndromo
-            break;             
+            break;
         }
     }
 
@@ -119,4 +119,3 @@ void imprime_tabuleiro_visual(tp_listade *tabuleiro) {
 }
 
 #endif
-
