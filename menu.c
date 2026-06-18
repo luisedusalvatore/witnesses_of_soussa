@@ -29,6 +29,14 @@ typedef struct {
     float velPiscar;
 } Estrela;
 
+typedef struct {
+    Vector2 pos;       // Posição na tela
+    Vector2 vel;       // Velocidade de arremesso
+    float tamanho;     // Tamanho do dado
+    bool segurando;    // Verifica se o mouse está clicando nele
+    int valor;         // O número atual da face (1 a 6)
+} DadoInterativo;
+
 #define NUM_CORREDORES 4
 #define NUM_ESTRELAS 100
 
@@ -62,6 +70,25 @@ void ResetarCorredores(Corredor corredores[], float chaoY, float escala) {
     corredores[3] = (Corredor){ {-420 * escala, chaoY}, YELLOW,280 * escala, 0, false, false };
 }
 
+void DesenharDadoFace(float x, float y, float size, int valor, float escala) {
+    DrawRectangleRounded((Rectangle){x, y, size, size}, 0.2f, 5, WHITE);
+    DrawRectangleRoundedLines((Rectangle){x, y, size, size}, 0.2f, 5, 2, BLACK);
+
+    float p25 = size * 0.25f, p50 = size * 0.50f, p75 = size * 0.75f;
+    float r = 4 * escala; // Raio das bolinhas
+
+    if (valor == 1 || valor == 3 || valor == 5) DrawCircle(x + p50, y + p50, r, BLACK); // Centro
+    if (valor == 2 || valor == 3 || valor == 4 || valor == 5 || valor == 6) {
+        DrawCircle(x + p25, y + p25, r, BLACK); DrawCircle(x + p75, y + p75, r, BLACK); // Diagonais 1
+    }
+    if (valor == 4 || valor == 5 || valor == 6) {
+        DrawCircle(x + p75, y + p25, r, BLACK); DrawCircle(x + p25, y + p75, r, BLACK); // Diagonais 2
+    }
+    if (valor == 6) {
+        DrawCircle(x + p25, y + p50, r, BLACK); DrawCircle(x + p75, y + p50, r, BLACK); // Meios
+    }
+}
+
 // --------------------------------------------------------------------------
 // FUNÇÃO PRINCIPAL
 // --------------------------------------------------------------------------
@@ -75,6 +102,8 @@ int main(void) {
 
     InitAudioSystem();
     PlayMusicTrack(0);
+    float volumeMaster = 0.3f;
+    SetMasterVolume(volumeMaster);
 
     TelaAtual tela = TELA_MENU;
     Corredor corredores[NUM_CORREDORES];
@@ -84,6 +113,8 @@ int main(void) {
     float posNuvem1 = screenWidth * 0.25f;
     float posNuvem2 = screenWidth * 0.76f;
     float creditosY = screenHeight;
+
+
 
     // --- FRASES DO SPLASH (Estilo Minecraft) ---
     const char* frasesSplash[] = {
@@ -98,6 +129,11 @@ int main(void) {
     };
     int totalFrasesSplash = 7;
     const char* splashEscolhido = ""; // Variável que guardará a frase sorteada
+
+    // Procure pela linha: const char* splashEscolhido = "";
+    // Adicione isto logo abaixo:
+    DadoInterativo dadosInfo[2];
+    bool dadosIniciados = false;
 
     const char* linhasCreditos[] = {
         "CAMINHO DO CONHECIMENTO",
@@ -127,7 +163,7 @@ int main(void) {
     };
     int totalLinhasCreditos = 24;
 
-    while (!WindowShouldClose()) {   
+    while (!WindowShouldClose()) {
 
         int larguraAtual = GetScreenWidth();
         int alturaAtual = GetScreenHeight();
@@ -138,6 +174,12 @@ int main(void) {
         float tamanhoQuadrado = 50 * escala;
         float gapInicio = larguraAtual * 0.40f;
         float gapFim = larguraAtual * 0.60f;
+
+        // CÁLCULO DA MESA MOVIDO PARA O TOPO DO LOOP
+        float mesaW = larguraAtual * 0.7f;
+        float mesaH = alturaAtual * 0.4f;
+        float mesaX = (larguraAtual - mesaW) / 2.0f;
+        float mesaY = alturaAtual * 0.55f;
 
         if (primeiraVez) {
             ResetarCorredores(corredores, chaoY - tamanhoQuadrado, escala);
@@ -163,6 +205,8 @@ int main(void) {
         Rectangle btnCreditos = { larguraAtual / 2.0f - btnLargo / 2.0f, alturaAtual * 0.71f, btnLargo, btnAlto };
         Rectangle btnSair     = { larguraAtual - (120.0f * escala), 20.0f * escala, 100.0f * escala, 50.0f * escala };
         Rectangle btnVoltar   = { 20.0f * escala, 20.0f * escala, 120.0f * escala, 50.0f * escala };
+        Rectangle btnVolMenos = { 20.0f * escala, alturaAtual - (70.0f * escala), 50.0f * escala, 50.0f * escala };
+        Rectangle btnVolMais  = { 180.0f * escala, alturaAtual - (70.0f * escala), 50.0f * escala, 50.0f * escala };
 
         int tamFonteTitulo = 50 * escala;
         int tamFonteBotoes = 30 * escala;
@@ -178,6 +222,16 @@ int main(void) {
                     else if (CheckCollisionPointRec(mousePoint, btnInfo)) tela = TELA_INFORMACOES;
                     else if (CheckCollisionPointRec(mousePoint, btnCreditos)) tela = TELA_CREDITOS;
                     else if (CheckCollisionPointRec(mousePoint, btnSair)) return 0;
+                    else if (CheckCollisionPointRec(mousePoint, btnVolMenos)) {
+                        volumeMaster -= 0.1f; // Diminui 10%
+                        if (volumeMaster < 0.0f) volumeMaster = 0.0f; // Trava no 0%
+                        SetMasterVolume(volumeMaster);
+                    }
+                    else if (CheckCollisionPointRec(mousePoint, btnVolMais)) {
+                        volumeMaster += 0.1f; // Aumenta 10%
+                        if (volumeMaster > 1.0f) volumeMaster = 1.0f; // Trava no 100%
+                        SetMasterVolume(volumeMaster);
+                    }
                 }
 
                 posNuvem1 -= 30.0f * escala * dt;
@@ -257,6 +311,51 @@ int main(void) {
             case TELA_JOGO:
             case TELA_INFORMACOES:
                 if (clique && CheckCollisionPointRec(mousePoint, btnVoltar)) tela = TELA_MENU;
+
+                // Define as posições iniciais apenas na primeira vez que a tela carrega
+                if (!dadosIniciados) {
+                    dadosInfo[0] = (DadoInterativo){ {mesaX + 60*escala, mesaY + mesaH/2 - 40*escala}, {0,0}, 40*escala, false, 5 };
+                    dadosInfo[1] = (DadoInterativo){ {dadosInfo[0].pos.x + 50*escala, dadosInfo[0].pos.y + 30*escala}, {0,0}, 40*escala, false, 3 };
+                    dadosIniciados = true;
+                }
+
+                for (int i = 0; i < 2; i++) {
+                    Rectangle recDado = { dadosInfo[i].pos.x, dadosInfo[i].pos.y, dadosInfo[i].tamanho, dadosInfo[i].tamanho };
+
+                    // Pegar o dado
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(mousePoint, recDado)) {
+                        dadosInfo[i].segurando = true;
+                    }
+
+                    if (dadosInfo[i].segurando) {
+                        Vector2 delta = GetMouseDelta(); // Lê o movimento do mouse
+                        dadosInfo[i].pos.x += delta.x;
+                        dadosInfo[i].pos.y += delta.y;
+
+                        // O arremesso ganha força baseada no movimento do mouse
+                        dadosInfo[i].vel.x = delta.x * 15.0f;
+                        dadosInfo[i].vel.y = delta.y * 15.0f;
+
+                        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) dadosInfo[i].segurando = false;
+                    } else {
+                        // Aplicar atrito e movimento livre
+                        dadosInfo[i].pos.x += dadosInfo[i].vel.x * dt;
+                        dadosInfo[i].pos.y += dadosInfo[i].vel.y * dt;
+                        dadosInfo[i].vel.x *= 0.95f;
+                        dadosInfo[i].vel.y *= 0.95f;
+
+                        // Ilusão de rolar: O número muda loucamente quando o dado está muito rápido!
+                        if ((fabs(dadosInfo[i].vel.x) > 40.0f || fabs(dadosInfo[i].vel.y) > 40.0f) && GetRandomValue(0,10) > 7) {
+                            dadosInfo[i].valor = GetRandomValue(1, 6);
+                        }
+                    }
+
+                    // Prende o dado 100% do tempo dentro da mesa marrom (quicando as bordas)
+                    if (dadosInfo[i].pos.x < mesaX) { dadosInfo[i].pos.x = mesaX; dadosInfo[i].vel.x *= -0.8f; }
+                    if (dadosInfo[i].pos.x + dadosInfo[i].tamanho > mesaX + mesaW) { dadosInfo[i].pos.x = mesaX + mesaW - dadosInfo[i].tamanho; dadosInfo[i].vel.x *= -0.8f; }
+                    if (dadosInfo[i].pos.y < mesaY) { dadosInfo[i].pos.y = mesaY; dadosInfo[i].vel.y *= -0.8f; }
+                    if (dadosInfo[i].pos.y + dadosInfo[i].tamanho > mesaY + mesaH) { dadosInfo[i].pos.y = mesaY + mesaH - dadosInfo[i].tamanho; dadosInfo[i].vel.y *= -0.8f; }
+                }
                 break;
         }
 
@@ -267,22 +366,22 @@ int main(void) {
         // --------------------------------------------------------------------------
         // LÓGICA DE MUSICAS
         // --------------------------------------------------------------------------
-        
+
         static TelaAtual telaAnterior = (TelaAtual)-1; // identifica qual era a tela anterior para mudar as musicas do menu
 
             if (tela != telaAnterior) {
                 if (tela == TELA_MENU && telaAnterior == TELA_CREDITOS) {
                     PlayMusicTrack(0); // Toca música do Menu
-                } 
+                }
                 else if (tela == TELA_CREDITOS) {
                     PlayMusicTrack(1); // Toca música dos Créditos
                 }
-                
+
                 telaAnterior = tela; // Atualiza o estado da tela
             }
 
             UpdateAudioSystem(); // Continua atualizando o stream
- 
+
 
         // ----------------------------------------------------------------------
         // LÓGICA DE RENDERIZAÇÃO (Draw)
@@ -358,6 +457,21 @@ int main(void) {
 
                 DesenharBotaoCentralizado(btnSair, "Sair", fonteOffbit, tamFonteBotoes);
                 if (CheckCollisionPointRec(mousePoint, btnSair)) DrawRectangleRoundedLines(btnSair, 0.4f, 10, 3, WHITE);
+
+                // --- DESENHAR CONTROLES DE VOLUME ---
+                DesenharBotaoCentralizado(btnVolMenos, "-", fonteOffbit, tamFonteBotoes);
+                if (CheckCollisionPointRec(mousePoint, btnVolMenos)) DrawRectangleRoundedLines(btnVolMenos, 0.4f, 10, 3, WHITE);
+
+                DesenharBotaoCentralizado(btnVolMais, "+", fonteOffbit, tamFonteBotoes);
+                if (CheckCollisionPointRec(mousePoint, btnVolMais)) DrawRectangleRoundedLines(btnVolMais, 0.4f, 10, 3, WHITE);
+
+                // Usa o TextFormat do Raylib para criar a string "VOL: XX%"
+                const char* textoVol = TextFormat("VOL: %d%%", (int)(volumeMaster * 100.0f + 0.5f));
+                Vector2 tamTextoVol = MeasureTextEx(fonteOffbit, textoVol, tamFonteTexto, 1);
+
+                // Desenha o texto exatamente entre o botão de Menos e o botão de Mais
+                DrawTextEx(fonteOffbit, textoVol, (Vector2){ 125.0f * escala - (tamTextoVol.x / 2.0f), alturaAtual - (55.0f * escala) }, tamFonteTexto, 1, WHITE);
+                // ------------------------------------
                 break;
 
             case TELA_CREDITOS:
@@ -422,25 +536,14 @@ int main(void) {
                     DrawRectangle(cx + (3-i)*(casaSize + 5*escala), cy + 3*(casaSize + 5*escala), casaSize, casaSize, coresCasas[(8+i)%8]);
                 }
 
-                float dadoSize = 40 * escala;
+                // ... (logo abaixo do desenho do tabuleirozinho branco na mesa)
+                for(int i = 0; i < 4; i++) {
+                    DrawRectangle(cx + (3-i)*(casaSize + 5*escala), cy + 3*(casaSize + 5*escala), casaSize, casaSize, coresCasas[(8+i)%8]);
+                }
 
-                float dado1X = mesaX + 60 * escala;
-                float dado1Y = mesaY + mesaH / 2.0f - dadoSize;
-                DrawRectangleRounded((Rectangle){dado1X, dado1Y, dadoSize, dadoSize}, 0.2f, 5, WHITE);
-                DrawRectangleRoundedLines((Rectangle){dado1X, dado1Y, dadoSize, dadoSize}, 0.2f, 5, 2, BLACK);
-                DrawCircle(dado1X + dadoSize*0.25f, dado1Y + dadoSize*0.25f, 4*escala, BLACK);
-                DrawCircle(dado1X + dadoSize*0.75f, dado1Y + dadoSize*0.25f, 4*escala, BLACK);
-                DrawCircle(dado1X + dadoSize*0.50f, dado1Y + dadoSize*0.50f, 4*escala, BLACK);
-                DrawCircle(dado1X + dadoSize*0.25f, dado1Y + dadoSize*0.75f, 4*escala, BLACK);
-                DrawCircle(dado1X + dadoSize*0.75f, dado1Y + dadoSize*0.75f, 4*escala, BLACK);
-
-                float dado2X = dado1X + 50 * escala;
-                float dado2Y = dado1Y + 30 * escala;
-                DrawRectangleRounded((Rectangle){dado2X, dado2Y, dadoSize, dadoSize}, 0.2f, 5, WHITE);
-                DrawRectangleRoundedLines((Rectangle){dado2X, dado2Y, dadoSize, dadoSize}, 0.2f, 5, 2, BLACK);
-                DrawCircle(dado2X + dadoSize*0.25f, dado2Y + dadoSize*0.75f, 4*escala, BLACK);
-                DrawCircle(dado2X + dadoSize*0.50f, dado2Y + dadoSize*0.50f, 4*escala, BLACK);
-                DrawCircle(dado2X + dadoSize*0.75f, dado2Y + dadoSize*0.25f, 4*escala, BLACK);
+                // CHAMA A NOSSA FUNÇÃO PARA DESENHAR OS DADOS COM A FÍSICA APLICADA
+                DesenharDadoFace(dadosInfo[0].pos.x, dadosInfo[0].pos.y, dadosInfo[0].tamanho, dadosInfo[0].valor, escala);
+                DesenharDadoFace(dadosInfo[1].pos.x, dadosInfo[1].pos.y, dadosInfo[1].tamanho, dadosInfo[1].valor, escala);
                 break;
             }
 
