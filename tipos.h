@@ -52,9 +52,9 @@ typedef struct{
 } tp_pergunta;
 
 typedef struct no{
-int Casa;
+int info;
 int cont;
-int altura;
+int alt;
 struct no *esq;
 struct no *dir;
 } noAVL;
