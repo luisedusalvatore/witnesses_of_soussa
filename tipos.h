@@ -51,7 +51,7 @@ typedef struct{
     char resposta;
 } tp_pergunta;
 
-typedef struct no{
+typedef struct NO{
 int info;
 int cont;
 int alt;
