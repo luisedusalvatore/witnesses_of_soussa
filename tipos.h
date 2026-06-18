@@ -51,12 +51,5 @@ typedef struct{
     char resposta;
 } tp_pergunta;
 
-typedef struct NO{
-int info;
-int cont;
-int alt;
-struct no *esq;
-struct no *dir;
-} noAVL;
 
 # endif
