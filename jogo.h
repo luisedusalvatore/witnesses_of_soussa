@@ -1,3 +1,6 @@
+#ifndef JOGO_H_INCLUDED
+#define JOGO_H_INCLUDED
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -16,13 +19,16 @@
 #include "hank.h"
 
 int roda_jogo(){
-    FILE *arquivo;
-    tp_arvore arvore;
-    *arquivo = carrega_hank(&arvore);
+    // ==========================================
+    // NOVA INICIALIZAÇÃO DO RANKING (AVL)
+    // ==========================================
+    ArvAVL arvore = NULL;
+    carrega_hank(&arvore);
+
     srand(time(NULL)); // gera a seed para os numeros aleatorios
     int quant;         // quantidade de jogadores
 
-    // declaração da pilha,  fila e lista dinamicas
+    // declaração da pilha, fila e lista dinamicas
     tp_pilha *perguntas_faceis, *perguntas_medias;
     tp_pilha *perguntas_faceis_descartadas, *perguntas_medias_descartadas;
     tp_fila *jogadores;
@@ -66,22 +72,33 @@ int roda_jogo(){
             getchar();
         }
     }
-    Player *e;
+
+    // ==========================================
+    // LIMPEZA DE MEMÓRIA E SALVAMENTO SEGURO
+    // ==========================================
+    Player e; // Struct normal alocada na stack (evita o crash!)
+
     // processo de limpar memoria
     destroi_pilha(perguntas_faceis);
     destroi_pilha(perguntas_faceis_descartadas);
     destroi_pilha(perguntas_medias);
     destroi_pilha(perguntas_medias_descartadas);
+
     while(!fila_vazia(jogadores)){
-        remove_fila(jogadores, e);
-        salva_hank(arquivo, e->dados);
+        remove_fila(jogadores, &e); // Passa o endereço da struct
+        salva_hank(e.dados);        // Salva os dados do jogador atual no txt
     }
     destroi_fila(jogadores);
+
     while (!listade_vazia(tabuleiro)) {
         remove_listade(tabuleiro, tabuleiro->ini->info.posicao);
     }
     free(tabuleiro);
-    fclose(arquivo);
+
+    // Obs: A árvore AVL será liberada pelo sistema operacional ao fim do programa,
+    // mas num cenário ideal futuro você pode chamar um liberaABB(&arvore) aqui.
 
     return 0;
 }
+
+#endif // JOGO_H_INCLUDED
