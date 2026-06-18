@@ -1,6 +1,5 @@
 #ifndef jogadores_h
 #define jogadores_h
-
 #include <stdio.h>
 #include <string.h>
 #include "filade.h"
@@ -11,6 +10,7 @@
 #include "listade.h"
 #include "tipos.h"
 #include "tabuleiro.h"
+#include "hank.h"
 
 // declaração previa do prototipo da função de imprimir a opção dos itens ( estava dando erro de implicit sem ela)
 void imprime_nome_item(int id);
@@ -577,4 +577,3 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
 }
 
 #endif
-
