@@ -1,36 +1,39 @@
+#ifndef ARVAVLR_H_INCLUDED
+#define ARVAVLR_H_INCLUDED
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
 #include "tipos.h"
 
-typedef struct NO* ArvAVL;
+// 1. STRUCT CORRIGIDA (Renomeada e Descomentada)
+struct tp_no_arvore {
+   struct tp_no_arvore *esq;
+   tp_hank info;    // <-- AGORA GUARDA O RANKING INTEIRO!
+   int alt;
+   int cont;
+   struct tp_no_arvore *dir;
+};
 
-//struct NO{
-  // struct NO *esq;
-   //int info;
-   //int alt; //altura da sub-árvore (facilita o cálculo do fator de balanceamento!)
-   //struct NO *dir;
-//};
+typedef struct tp_no_arvore* ArvAVL;
 
+// PROTÓTIPOS
 ArvAVL* criarAVL();
 void preOrd(ArvAVL* raiz);
 void emOrd(ArvAVL* raiz);
 void posOrd(ArvAVL* raiz);
-int inserir(ArvAVL* raiz, int valor);
-int remover(ArvAVL* raiz, int valor); // Responsável pela busca do nó a ser removido
-struct NO* buscarMenor(struct NO* atual); // Busca o nó mais a esquerda de uma árvore
-int consultarValorAVL(ArvAVL* raiz, int valor);
+int inserir(ArvAVL* raiz, tp_hank novo_dado);
+struct tp_no_arvore* buscarMenor(struct tp_no_arvore* atual);
 int maior(int x, int y);
-int alt_NO(struct NO* no);
-int fb_NO(struct NO* no);
+int alt_NO(struct tp_no_arvore* no);
+int fb_NO(struct tp_no_arvore* no);
 void RotacaoLL(ArvAVL* raiz);
 void RotacaoRR(ArvAVL* raiz);
 void RotacaoRL(ArvAVL* raiz);
 void RotacaoLR(ArvAVL* raiz);
-int CaiuNaCasa(ArvAVL* raiz, int id_casa)
 
-int contPrint=0;
+static int contPrint=0; // 3. STATIC ADICIONADO AQUI
 
 ArvAVL* criarAVL(){
     ArvAVL *raiz = (ArvAVL*)malloc(sizeof(ArvAVL));
@@ -38,21 +41,19 @@ ArvAVL* criarAVL(){
         *raiz = NULL;
     }
     return raiz;
-
 }
-
 
 int estah_vaziaABB(ArvAVL* raiz){
 	if(raiz==NULL) return 1;
 	if(*raiz == NULL) return 1;
 	return 0;
-}	
+}
 
 void preOrd(ArvAVL* raiz){
    if(raiz==NULL) return;
    if(*raiz != NULL){
    	  if(contPrint!=0){
-	     printf(" ");	 
+	     printf(" ");
 	  }
       printf("%d", (*raiz)->info);
       contPrint++;
@@ -64,10 +65,9 @@ void preOrd(ArvAVL* raiz){
 void emOrd(ArvAVL* raiz){
    if(raiz==NULL) return;
    if(*raiz != NULL){
-   	  //printf("Contador:%d", contPrint);
       emOrd(&((*raiz)->esq));
    	  if(contPrint!=0){
-	     printf(" ");	 
+	     printf(" ");
 	  }
       printf("%d", (*raiz)->info);
       contPrint++;
@@ -81,13 +81,12 @@ void posOrd(ArvAVL* raiz){
       posOrd(&((*raiz)->esq));
       posOrd(&((*raiz)->dir));
    	  if(contPrint!=0){
-	     printf(" ");	 
+	     printf(" ");
 	  }
       printf("%d", (*raiz)->info);
       contPrint++;
    }
 }
-
 
 int alturaAVL(ArvAVL* raiz){
 	if(raiz == NULL) return 0;
@@ -109,27 +108,28 @@ int totalNOsABB(ArvAVL* raiz){
 	return (tot_esq + tot_dir + 1);
 }
 
+// Atualize também o protótipo lá em cima para: int inserir(ArvAVL* raiz, tp_hank novo_dado);
 
-
-int inserir(ArvAVL* raiz, int valor){	
+int inserir(ArvAVL* raiz, tp_hank novo_dado){
 	int res;
 	if(*raiz==NULL){
-		struct NO* novo;
-		novo = (struct NO*)malloc(sizeof(struct NO));
+		struct tp_no_arvore* novo;
+		novo = (struct tp_no_arvore*)malloc(sizeof(struct tp_no_arvore));
 		if(novo==NULL) return 0;
-		novo->info = valor;
+		novo->info = novo_dado; // Copia a struct inteira com nome, erros, acertos e score!
 		novo->cont = 0;
 		novo->alt = 0;
 		novo->dir = NULL;
 		novo->esq = NULL;
 		*raiz = novo;
-		return 1;	
+		return 1;
 	} else {
-		struct NO* atual = *raiz;
-		if(valor < atual->info){
-			if((res=inserir(&(atual->esq), valor))==1){
+		struct tp_no_arvore* atual = *raiz;
+        // COMPARA PELO SCORE DA STRUCT
+		if(novo_dado.score < atual->info.score){
+			if((res=inserir(&(atual->esq), novo_dado))==1){
 				if(fb_NO(atual) >= 2){
-					if(valor < (*raiz)->esq->info){
+					if(novo_dado.score < (*raiz)->esq->info.score){
 						RotacaoLL(raiz);
 					}else{
 						RotacaoLR(raiz);
@@ -137,26 +137,36 @@ int inserir(ArvAVL* raiz, int valor){
 				}
 			}
 		}else{
-			if(valor > atual->info){
-				if((res=inserir(&(atual->dir), valor))==1){
-					if(fb_NO(atual) >= 2){
-						if(valor > (*raiz)->dir->info){
-							RotacaoRR(raiz);
-						}else{
-							RotacaoRL(raiz);
-						}
+            // Se for MAIOR OU IGUAL (permite scores repetidos) vai para a direita
+			if((res=inserir(&(atual->dir), novo_dado))==1){
+				if(fb_NO(atual) >= 2){
+                    // Usa >= para acompanhar a lógica de permitir empates
+					if(novo_dado.score >= (*raiz)->dir->info.score){
+						RotacaoRR(raiz);
+					}else{
+						RotacaoRL(raiz);
 					}
 				}
-			}else{
-				return 0; // Valor Duplicado
 			}
 		}
 		atual->alt = maior(alt_NO(atual->esq), alt_NO(atual->dir)) + 1;
 		return res;
-	} 
+	}
 }
 
-void liberaNO(struct NO* no){
+void imprimeRanking(ArvAVL* raiz){
+   if(raiz==NULL) return;
+   if(*raiz != NULL){
+      imprimeRanking(&((*raiz)->dir)); // Visita os maiores scores (Direita)
+
+      printf("Jogador: %-15s | Score: %4d | Acertos: %2d | Erros: %2d\n",
+             (*raiz)->info.nome, (*raiz)->info.score, (*raiz)->info.acertos, (*raiz)->info.erros);
+
+      imprimeRanking(&((*raiz)->esq)); // Visita os menores scores (Esquerda)
+   }
+}
+
+void liberaNO(struct tp_no_arvore* no){
    if(no==NULL) return;
    liberaNO(no->esq);
    liberaNO(no->dir);
@@ -169,11 +179,11 @@ void liberaABB(ArvAVL* raiz){
    liberaNO(*raiz);
    free(raiz);
 }
-
+/*
 int consultarValorAVL(ArvAVL* raiz, int valor){
 	if(raiz == NULL) return 0;
 	if(*raiz == NULL) return 0;
-	struct NO* atual = *raiz;
+	struct tp_no_arvore* atual = *raiz;
 	while(atual != NULL){
 		if(atual->info == valor){
 			return 1;
@@ -187,13 +197,13 @@ int consultarValorAVL(ArvAVL* raiz, int valor){
 	}
 	return 0;
 }
-
-int alt_NO(struct NO* no){
+*/
+int alt_NO(struct tp_no_arvore* no){
    if(no == NULL) return -1;
    else return no->alt;
 }
 
-int fb_NO(struct NO* no){
+int fb_NO(struct tp_no_arvore* no){
 	int esq = alt_NO(no->esq);
 	int dir = alt_NO(no->dir);
 	return labs(esq - dir);
@@ -204,8 +214,10 @@ int maior(int x, int y){
 }
 
 void RotacaoLL(ArvAVL* raiz){
-	struct NO *no;
+	struct tp_no_arvore *no;
 	no = (*raiz)->esq;
+    // 4. LINHA CRÍTICA ADICIONADA: Passa o filho da direita de 'no' para a esquerda da 'raiz'
+    (*raiz)->esq = no->dir;
 	no->dir = *raiz;
 	(*raiz)->alt = maior(alt_NO((*raiz)->esq), alt_NO((*raiz)->dir)) +1;
 	no->alt = maior(alt_NO(no->esq), (*raiz)->alt) + 1;
@@ -213,7 +225,7 @@ void RotacaoLL(ArvAVL* raiz){
 }
 
 void RotacaoRR(ArvAVL* raiz){
-   struct NO* no;
+   struct tp_no_arvore* no;
    no = (*raiz)->dir;
    (*raiz)->dir = no->esq;
    no->esq = *raiz;
@@ -232,12 +244,12 @@ void RotacaoRL(ArvAVL* raiz){
 	RotacaoRR(raiz);
 }
 
-int remover(ArvAVL* raiz, int valor){	
+/*int remover(ArvAVL* raiz, int valor){
 	int res;
 	if(*raiz==NULL){ // Valor não encontrado!
-		printf("Valor %d nao encontrado na árvore!", valor);
-		return 0;	
-	} 
+		printf("Valor %d nao encontrado na arvore!", valor);
+		return 0;
+	}
 	if(valor < (*raiz)->info){
 		if((res=remover(&(*raiz)->esq, valor))==1){
 			if(fb_NO(*raiz) >= 2){
@@ -247,7 +259,7 @@ int remover(ArvAVL* raiz, int valor){
 					RotacaoRL(raiz);
 				}
 			}
-		}				
+		}
 	}else if(valor > (*raiz)->info){
 		if((res=remover(&(*raiz)->dir, valor))==1){
 			if(fb_NO(*raiz) >= 2){
@@ -257,16 +269,16 @@ int remover(ArvAVL* raiz, int valor){
 					RotacaoLR(raiz);
 				}
 			}
-		}							
+		}
 	}else{ // raiz->info == valor...
 		if(((*raiz)->esq == NULL) || ((*raiz)->dir == NULL)){ // O Pai tem 1 ou nenhum filho
-			struct NO* noVelho = (*raiz);
+			struct tp_no_arvore* noVelho = (*raiz);
 			if((*raiz)->esq != NULL) *raiz = (*raiz)->esq;
 			else *raiz = (*raiz)->dir;
 			free(noVelho);
 			return 1;
 		}else{ // o nó tem 2 filhos: precisamos substituir pelo nó mais a esquerda da subárvore da direita
-			struct NO* temp = buscarMenor((*raiz)->dir);
+			struct tp_no_arvore* temp = buscarMenor((*raiz)->dir);
 			(*raiz)->info = temp->info;
 			remover(&(*raiz)->dir, (*raiz)->info);
 			if(fb_NO(*raiz) >= 2){
@@ -276,35 +288,37 @@ int remover(ArvAVL* raiz, int valor){
 					RotacaoLR(raiz);
 				}
 			}
-			return 1;			
+			return 1;
 		}
 		return res;
-	} 
+	}
 }
-
-struct NO* buscarMenor(struct NO* atual){
-	struct NO* no1 = atual;
-	struct NO* no2 = atual->esq;
+*/
+struct tp_no_arvore* buscarMenor(struct tp_no_arvore* atual){
+	struct tp_no_arvore* no1 = atual;
+	struct tp_no_arvore* no2 = atual->esq;
 	while(no2 != NULL){
 		no1 = no2;
 		no2 = no1->esq;
 	}
 	return no1;
 }
-
+/*
 int CaiuNaCasa(ArvAVL* raiz, int id_casa) {
     if (raiz == NULL || *raiz == NULL) return 0;
 
-    struct NO* atual = *raiz;
+    struct tp_no_arvore* atual = *raiz;
     while (atual != NULL) {
         if (atual->info == id_casa) {
-            atual->cont++; 
-            return 1;      
+            atual->cont++;
+            return 1;
         } else if (id_casa < atual->info) {
             atual = atual->esq;
         } else {
             atual = atual->dir;
         }
     }
-    return 0; 
+    return 0;
 }
+*/
+#endif // ARVAVLR_H_INCLUDED
