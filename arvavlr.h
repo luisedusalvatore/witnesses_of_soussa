@@ -2,15 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include "tipos.h"
 
 typedef struct NO* ArvAVL;
 
-struct NO{
-   struct NO *esq;
-   int info;
-   int alt; //altura da sub-árvore (facilita o cálculo do fator de balanceamento!)
-   struct NO *dir;
-};
+//struct NO{
+  // struct NO *esq;
+   //int info;
+   //int alt; //altura da sub-árvore (facilita o cálculo do fator de balanceamento!)
+   //struct NO *dir;
+//};
 
 ArvAVL* criarAVL();
 void preOrd(ArvAVL* raiz);
@@ -27,6 +28,7 @@ void RotacaoLL(ArvAVL* raiz);
 void RotacaoRR(ArvAVL* raiz);
 void RotacaoRL(ArvAVL* raiz);
 void RotacaoLR(ArvAVL* raiz);
+int CaiuNaCasa(ArvAVL* raiz, int id_casa)
 
 int contPrint=0;
 
@@ -116,6 +118,7 @@ int inserir(ArvAVL* raiz, int valor){
 		novo = (struct NO*)malloc(sizeof(struct NO));
 		if(novo==NULL) return 0;
 		novo->info = valor;
+		novo->cont = 0;
 		novo->alt = 0;
 		novo->dir = NULL;
 		novo->esq = NULL;
@@ -287,4 +290,21 @@ struct NO* buscarMenor(struct NO* atual){
 		no2 = no1->esq;
 	}
 	return no1;
+}
+
+int CaiuNaCasa(ArvAVL* raiz, int id_casa) {
+    if (raiz == NULL || *raiz == NULL) return 0;
+
+    struct NO* atual = *raiz;
+    while (atual != NULL) {
+        if (atual->info == id_casa) {
+            atual->cont++; 
+            return 1;      
+        } else if (id_casa < atual->info) {
+            atual = atual->esq;
+        } else {
+            atual = atual->dir;
+        }
+    }
+    return 0; 
 }
