@@ -23,9 +23,8 @@ int roda_jogo(){
     // NOVA INICIALIZAÇÃO DO RANKING (AVL)
     // ==========================================
     ArvAVL arvore = NULL;
-    carrega_hank(&arvore);
 
-    srand(time(NULL)); // gera a seed para os numeros aleatorios
+    srand(time(NULL));
     int quant;         // quantidade de jogadores
 
     // declaração da pilha, fila e lista dinamicas
