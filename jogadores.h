@@ -577,3 +577,4 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
 }
 
 #endif
+ 
