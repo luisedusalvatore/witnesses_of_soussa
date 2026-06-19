@@ -6,9 +6,12 @@
 
 
 int eh_primo(int posi){
-    // implementar lógica que verifica se o número da casa é primo
+    // Se for 1 ou menor, não é primo
+    if (posi <= 1) return 0;
+
+    // A lógica correta: se for divisível (resto == 0) por qualquer número antes dele, não é primo!
     for (int i = 2; i < posi; i++){
-        if (posi % i != 0) return 0;
+        if (posi % i == 0) return 0; // O erro estava aqui!
     }
     return 1;
 }
@@ -58,16 +61,30 @@ int eh_binario(int posi){
 
 // retorna 0 (normal), 1 (pergunta) ou 2 (baú)
 int tipo_casa(int posi) {
-    if (posi == 1) return 0; // a casa inicial é segura
+    if (posi == 1) return 0; // a casa inicial é sempre segura
 
-    // damos prioridade para o baú na sobreposição
-    if (eh_binario(posi)) return 2; // é uma potência de 2 -> BAÚ
+    // 1. Calculamos as duas condições separadamente (incluindo as casas 6 e 8)
+    int condicao_pergunta = eh_primo(posi) || (posi % 6 == 0) || (posi % 8 == 0);
+    int condicao_bau = eh_binario(posi);
 
-    if (eh_primo(posi)) return 1;   // é número primo -> PERGUNTA
+    // 2. O GRANDE SORTEIO (Se a casa atende às duas regras)
+    if (condicao_pergunta && condicao_bau) {
+        if (rand() % 2 == 0) {
+            return 1; // 50% de chance de virar Pergunta
+        } else {
+            return 2; // 50% de chance de virar Baú
+        }
+    }
 
-    return 0; // casa normal
+    // 3. Se atender apenas a uma das regras, aplica direto
+    if (condicao_pergunta) return 1;
+    if (condicao_bau) return 2;
+
+    // 4. Se não bater em nada, é uma casa neutra (normal)
+    return 0;
 }
 
+// Inicia o tabuleiro e já chama o sorteio para cada casa
 int inicia_tabuleiro(tp_listade *tabuleiro, int tam){
     for(int i = 0; i < tam; i++){
         insere_listade_no_fim(tabuleiro, i+1, tipo_casa(i+1));
