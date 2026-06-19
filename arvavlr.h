@@ -7,12 +7,10 @@
 #include <locale.h>
 #include "tipos.h"
 
-// 1. STRUCT CORRIGIDA (Renomeada e Descomentada)
 struct tp_no_arvore {
    struct tp_no_arvore *esq;
-   tp_hank info;    // <-- AGORA GUARDA O RANKING INTEIRO!
+   tp_estatistica_casa info; // <-- AGORA GUARDA OS DADOS DA CASA!
    int alt;
-   int cont;
    struct tp_no_arvore *dir;
 };
 
@@ -23,7 +21,6 @@ ArvAVL* criarAVL();
 void preOrd(ArvAVL* raiz);
 void emOrd(ArvAVL* raiz);
 void posOrd(ArvAVL* raiz);
-int inserir(ArvAVL* raiz, tp_hank novo_dado);
 struct tp_no_arvore* buscarMenor(struct tp_no_arvore* atual);
 int maior(int x, int y);
 int alt_NO(struct tp_no_arvore* no);
@@ -32,6 +29,8 @@ void RotacaoLL(ArvAVL* raiz);
 void RotacaoRR(ArvAVL* raiz);
 void RotacaoRL(ArvAVL* raiz);
 void RotacaoLR(ArvAVL* raiz);
+int inserir(ArvAVL* raiz, tp_estatistica_casa novo_dado);
+void registra_passagem(ArvAVL* raiz, int num_casa, int acertou, int errou);
 
 static int contPrint=0; // 3. STATIC ADICIONADO AQUI
 
@@ -55,7 +54,7 @@ void preOrd(ArvAVL* raiz){
    	  if(contPrint!=0){
 	     printf(" ");
 	  }
-      printf("%d", (*raiz)->info);
+      printf("%d", (*raiz)->info.numero_casa);
       contPrint++;
       preOrd(&((*raiz)->esq));
       preOrd(&((*raiz)->dir));
@@ -69,7 +68,7 @@ void emOrd(ArvAVL* raiz){
    	  if(contPrint!=0){
 	     printf(" ");
 	  }
-      printf("%d", (*raiz)->info);
+      printf("%d", (*raiz)->info.numero_casa);
       contPrint++;
       emOrd(&((*raiz)->dir));
    }
@@ -83,7 +82,7 @@ void posOrd(ArvAVL* raiz){
    	  if(contPrint!=0){
 	     printf(" ");
 	  }
-      printf("%d", (*raiz)->info);
+      printf("%d", (*raiz)->info.numero_casa);
       contPrint++;
    }
 }
@@ -110,14 +109,12 @@ int totalNOsABB(ArvAVL* raiz){
 
 // Atualize também o protótipo lá em cima para: int inserir(ArvAVL* raiz, tp_hank novo_dado);
 
-int inserir(ArvAVL* raiz, tp_hank novo_dado){
+int inserir(ArvAVL* raiz, tp_estatistica_casa novo_dado){
 	int res;
 	if(*raiz==NULL){
-		struct tp_no_arvore* novo;
-		novo = (struct tp_no_arvore*)malloc(sizeof(struct tp_no_arvore));
+		struct tp_no_arvore* novo = (struct tp_no_arvore*)malloc(sizeof(struct tp_no_arvore));
 		if(novo==NULL) return 0;
-		novo->info = novo_dado; // Copia a struct inteira com nome, erros, acertos e score!
-		novo->cont = 0;
+		novo->info = novo_dado;
 		novo->alt = 0;
 		novo->dir = NULL;
 		novo->esq = NULL;
@@ -125,45 +122,46 @@ int inserir(ArvAVL* raiz, tp_hank novo_dado){
 		return 1;
 	} else {
 		struct tp_no_arvore* atual = *raiz;
-        // COMPARA PELO SCORE DA STRUCT
-		if(novo_dado.score < atual->info.score){
+        // COMPARA PELO NÚMERO DA CASA (CHAVE)
+		if(novo_dado.numero_casa < atual->info.numero_casa){
 			if((res=inserir(&(atual->esq), novo_dado))==1){
 				if(fb_NO(atual) >= 2){
-					if(novo_dado.score < (*raiz)->esq->info.score){
-						RotacaoLL(raiz);
-					}else{
-						RotacaoLR(raiz);
-					}
+					if(novo_dado.numero_casa < (*raiz)->esq->info.numero_casa) RotacaoLL(raiz);
+					else RotacaoLR(raiz);
 				}
 			}
-		}else{
-            // Se for MAIOR OU IGUAL (permite scores repetidos) vai para a direita
+		} else if(novo_dado.numero_casa > atual->info.numero_casa){
 			if((res=inserir(&(atual->dir), novo_dado))==1){
 				if(fb_NO(atual) >= 2){
-                    // Usa >= para acompanhar a lógica de permitir empates
-					if(novo_dado.score >= (*raiz)->dir->info.score){
-						RotacaoRR(raiz);
-					}else{
-						RotacaoRL(raiz);
-					}
+					if(novo_dado.numero_casa > (*raiz)->dir->info.numero_casa) RotacaoRR(raiz);
+					else RotacaoRL(raiz);
 				}
 			}
-		}
+		} else {
+            return 0; // Casa já existe, não insere duplicado!
+        }
 		atual->alt = maior(alt_NO(atual->esq), alt_NO(atual->dir)) + 1;
 		return res;
 	}
 }
 
-void imprimeRanking(ArvAVL* raiz){
-   if(raiz==NULL) return;
-   if(*raiz != NULL){
-      imprimeRanking(&((*raiz)->dir)); // Visita os maiores scores (Direita)
+// Função que o professor exigiu: Busca a casa em tempo logarítmico e atualiza os status
+void registra_passagem(ArvAVL* raiz, int num_casa, int acertou, int errou) {
+    if(raiz == NULL || *raiz == NULL) return;
 
-      printf("Jogador: %-15s | Score: %4d | Acertos: %2d | Erros: %2d\n",
-             (*raiz)->info.nome, (*raiz)->info.score, (*raiz)->info.acertos, (*raiz)->info.erros);
+    struct tp_no_arvore* atual = *raiz;
 
-      imprimeRanking(&((*raiz)->esq)); // Visita os menores scores (Esquerda)
-   }
+    while(atual != NULL){
+        if(atual->info.numero_casa == num_casa){
+            atual->info.vezes_caiu++;
+            if(acertou) atual->info.acertos++;
+            if(errou) atual->info.erros++;
+            return;
+        }
+
+        if(num_casa < atual->info.numero_casa) atual = atual->esq;
+        else atual = atual->dir;
+    }
 }
 
 void liberaNO(struct tp_no_arvore* no){
@@ -303,6 +301,15 @@ struct tp_no_arvore* buscarMenor(struct tp_no_arvore* atual){
 	}
 	return no1;
 }
+
+void salva_hank(tp_hank jogador){
+    FILE *arquivo = fopen("hank.txt", "a");
+    if(arquivo != NULL) {
+        fprintf(arquivo, "%d %d %d %s\n", jogador.acertos, jogador.erros, jogador.score, jogador.nome);
+        fclose(arquivo);
+    }
+}
+
 /*
 int CaiuNaCasa(ArvAVL* raiz, int id_casa) {
     if (raiz == NULL || *raiz == NULL) return 0;
