@@ -4,52 +4,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// 1. Atualizado para incluir a nova biblioteca AVL
 #include "arvavlr.h"
 #include "tipos.h"
 
+// Mantemos isso para inicializar o jogador (não afeta a árvore)
 int inicializa_hank(Player *jogador){
     jogador->dados.acertos = 0;
     jogador->dados.erros = 0;
     jogador->dados.score = 0;
-    // Removi o strcpy aqui pois o jogador->nome já é preenchido lá no lerDados!
     return 1;
 }
 
-// 2. Função agora é void. Ela apenas abre, lê e FECHA o arquivo.
-void carrega_hank(ArvAVL *arvore){
-    *arvore = NULL;
+// Função recursiva para percorrer a árvore AVL (In-Ordem) e imprimir no arquivo
+void grava_no_arquivo(ArvAVL* raiz, FILE *arquivo){
+    if(raiz == NULL || *raiz == NULL) return;
 
-    // 3. MODO "r" (READ): Lê o arquivo sem apagá-lo
-    FILE *arquivo = fopen("hank.txt", "r");
+    grava_no_arquivo(&((*raiz)->esq), arquivo); // Vai para a esquerda
 
-    // Proteção: Se for a 1ª vez rodando o jogo e o txt não existir, sai da função
-    if (arquivo == NULL) {
-        return;
-    }
+    fprintf(arquivo, "Casa: %02d | Visitas: %02d | Acertos: %02d | Erros: %02d\n",
+            (*raiz)->info.numero_casa, (*raiz)->info.vezes_caiu,
+            (*raiz)->info.acertos, (*raiz)->info.erros);
 
-    tp_hank hank;
-
-    // 4. O \n no final do fscanf é importante para ler quebras de linha corretamente
-    while(fscanf(arquivo, "%d %d %d %[^\n]\n", &hank.acertos, &hank.erros, &hank.score, hank.nome) != EOF){
-
-        // NOTA: Como nossa AVL atual só aceita INT, estou passando o score temporariamente.
-        // Se formos guardar o 'tp_hank' inteiro na árvore, precisaremos adaptar o arvavlr.h
-        inserir(arvore, hank);
-    }
-
-    // Fecha o arquivo para liberar a memória
-    fclose(arquivo);
+    grava_no_arquivo(&((*raiz)->dir), arquivo); // Vai para a direita
 }
 
-// 5. Função de salvar agora recebe apenas o jogador e ela mesma abre o arquivo
-void salva_hank(tp_hank jogador){
-
-    // MODO "a" (APPEND): Adiciona a nova pontuação na última linha do txt sem apagar o resto
-    FILE *arquivo = fopen("hank.txt", "a");
+// Gera o arquivo de relatório final exigido pelo professor
+void salva_relatorio_casas(ArvAVL* arvore){
+    // Usamos "w" (Write) para criar um relatório fresco a cada partida jogada
+    FILE *arquivo = fopen("relatorio_casas.txt", "w");
 
     if(arquivo != NULL) {
-        fprintf(arquivo, "%d %d %d %s\n", jogador.acertos, jogador.erros, jogador.score, jogador.nome);
+        fprintf(arquivo, "--- RELATORIO DE ESTATISTICAS DO TABULEIRO ---\n");
+        fprintf(arquivo, "(Gerado atraves de percurso In-Ordem na Arvore AVL)\n\n");
+
+        grava_no_arquivo(arvore, arquivo); // Manda a árvore se imprimir no arquivo
+
         fclose(arquivo);
     }
 }
