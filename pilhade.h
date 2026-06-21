@@ -75,7 +75,7 @@ void imprime_pilha(tp_pilha *pilha) {
      printf("Topo -> [ ");
 	 while (!pilha_vazia(pilha)) {
         pop(pilha, &e);
-        printf("%c ", e.resposta);
+        printf("%c ", e.respostaCorreta);
         push(pilha_aux, e);
      }
      printf("] <- Fundo\n");
