@@ -52,10 +52,14 @@ typedef struct {
     int status_tudo_nada;    // 1 se ativou o "Tudo ou nada", 0 normal
 } Player;
 
-typedef struct{
-    int id;
+typedef struct {
+    char id[10];
+    int unidade;
+    char tema[50];
+    char subtema[50];      // campo novo exigido pelo historico.h
+    char dificuldade[20];
     char enunciado[300];
-    char resposta;
+    char respostaCorreta;
 } tp_pergunta;
 
 
