@@ -12,7 +12,9 @@ typedef enum {
     TELA_CADASTRO,
     TELA_JOGO,
     TELA_INFORMACOES,
-    TELA_CREDITOS
+    TELA_CREDITOS,
+    TELA_FIM_JOGO,
+    TELA_RANKING
 } TelaAtual;
 
 // ==========================================
@@ -84,6 +86,90 @@ void ResetarCorredores(Corredor corredores[], float chaoY, float escala) {
     corredores[3] = (Corredor){ {-420 * escala, chaoY}, YELLOW,280 * escala, 0, false, false };
 }
 
+// Função para desenhar o enunciado e as opções com cores e recuos diferentes
+// Função para desenhar o enunciado com quebra de linha automática (Word Wrap) e cores
+void DesenharPerguntaFormatada(Font fonte, const char* texto, Vector2 pos, float tamanhoFonte, float escala) {
+    float yAtual = pos.y;
+    float larguraMaxima = 700.0f * escala; // Limite da caixa branca antes de vazar
+    const char *ptr = texto;
+    const char *proxLinha;
+
+    while (*ptr != '\0') {
+        // Encontra a próxima quebra de linha forçada (os \n que usamos para separar alternativas)
+        proxLinha = strchr(ptr, '\n');
+        int len = (proxLinha != NULL) ? (proxLinha - ptr) : strlen(ptr);
+
+        char linhaOriginal[500];
+        strncpy(linhaOriginal, ptr, len);
+        linhaOriginal[len] = '\0';
+
+        // Verifica se a linha é uma opção de resposta ("1 -", "2 -", "V -", etc)
+        bool ehOpcao = false;
+        if (len > 3 && linhaOriginal[1] == ' ' && linhaOriginal[2] == '-') {
+            if ((linhaOriginal[0] >= '1' && linhaOriginal[0] <= '4') || linhaOriginal[0] == 'V' || linhaOriginal[0] == 'F') {
+                ehOpcao = true;
+            }
+        }
+
+        Color corTexto = ehOpcao ? DARKBLUE : BLACK;
+        float xAtual = ehOpcao ? pos.x + 30 * escala : pos.x;
+        float tamanhoAtual = ehOpcao ? tamanhoFonte * 0.9f : tamanhoFonte;
+
+        if (len > 0) {
+            // ==========================================
+            // LÓGICA DE WORD WRAP (Quebra Automática)
+            // ==========================================
+            char palavra[100];
+            char linhaExibicao[500] = "";
+            const char *pL = linhaOriginal;
+
+            while (*pL != '\0') {
+                // Pega a próxima palavra (lê até achar um espaço ou fim)
+                int wLen = 0;
+                while (pL[wLen] != '\0' && pL[wLen] != ' ') wLen++;
+
+                strncpy(palavra, pL, wLen);
+                palavra[wLen] = '\0';
+
+                // Testa como a linha ficaria se adicionássemos essa palavra
+                char testeLinha[600];
+                if (strlen(linhaExibicao) == 0) strcpy(testeLinha, palavra);
+                else {
+                    strcpy(testeLinha, linhaExibicao);
+                    strcat(testeLinha, " ");
+                    strcat(testeLinha, palavra);
+                }
+
+                // Se a linha com a nova palavra passar da borda da tela, desenha a atual e desce!
+                if (MeasureTextEx(fonte, testeLinha, tamanhoAtual, 1).x > larguraMaxima) {
+                    DrawTextEx(fonte, linhaExibicao, (Vector2){xAtual, yAtual}, tamanhoAtual, 1, corTexto);
+                    yAtual += tamanhoAtual * 1.1f;
+                    strcpy(linhaExibicao, palavra); // A nova linha começa com a palavra que sobrou
+                } else {
+                    strcpy(linhaExibicao, testeLinha); // Ainda cabe, então adiciona
+                }
+
+                pL += wLen;
+                while (*pL == ' ') pL++; // Pula os espaços em branco para a próxima iteração
+            }
+
+            // Desenha o que sobrou na última linha montada
+            if (strlen(linhaExibicao) > 0) {
+                DrawTextEx(fonte, linhaExibicao, (Vector2){xAtual, yAtual}, tamanhoAtual, 1, corTexto);
+                yAtual += tamanhoAtual * 1.1f;
+            }
+            // ==========================================
+
+        } else {
+            // Se a linha for vazia (um \n extra), dá apenas um espaço menor
+            yAtual += tamanhoFonte * 0.5f;
+        }
+
+        if (proxLinha == NULL) break;
+        ptr = proxLinha + 1;
+    }
+}
+
 void DesenharDadoFace(float x, float y, float size, int valor, float escala) {
     DrawRectangleRounded((Rectangle){x, y, size, size}, 0.2f, 5, WHITE);
     DrawRectangleRoundedLines((Rectangle){x, y, size, size}, 0.2f, 5, 2, BLACK);
@@ -103,7 +189,7 @@ void DesenharDadoFace(float x, float y, float size, int valor, float escala) {
     }
 }
 
-void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte) {
+void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char nomesPorCor[4][30]) {
     if (tabuleiro == NULL || tabuleiro->ini == NULL) return;
 
     // Medidas do novo mundo horizontal
@@ -124,6 +210,42 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte) {
     // Oceano Sólido (Vai do infinito negativo até começar a transição)
     DrawRectangle(-10000, -10000, 10000 + transicao1 - (fade/2.0f), 20000, corOceano);
 
+    // ========================================================
+    // EFEITO VISUAL: ONDAS DO OCEANO ANIMADAS
+    // ========================================================
+    float tempo = GetTime();
+    Color corOnda = (Color){ 135, 206, 250, 80 }; // Azul claro quase transparente (Light Sky Blue)
+
+    // Definimos uma grade virtual de ondas que cobre a área visível do oceano
+    int espacamentoX = 300 * escala;
+    int espacamentoY = 150 * escala;
+
+    for (int y = -2000; y <= 2000; y += espacamentoY) {
+        // Desloca as linhas ímpares para as ondas não formarem uma grade perfeita (estilo tijolinho)
+        float offsetLinha = (abs(y / espacamentoY) % 2 == 0) ? 0 : (150 * escala);
+
+        for (int x = -3000; x < transicao1; x += espacamentoX) {
+            // 1. Movimento contínuo para a esquerda:
+            // A velocidade varia levemente baseada no 'y' para criar um efeito Parallax (profundidade)
+            float velocidade = 50.0f * escala + (abs(y) % 30);
+            float deslocamentoX = fmod(tempo * velocidade, espacamentoX);
+            float posX = x + offsetLinha - deslocamentoX;
+
+            // Só desenha se a onda não tiver invadido a transição do Pântano
+            if (posX < transicao1 - (fade / 2.0f)) {
+                // 2. Movimento de flutuação (subir e descer):
+                float posY = y + sinf(tempo * 2.0f + posX * 0.01f) * (10.0f * escala);
+
+                // Desenha a crista da onda (duas linhas charmosas)
+                DrawLineEx((Vector2){posX, posY}, (Vector2){posX + 60 * escala, posY}, 4 * escala, corOnda);
+                DrawLineEx((Vector2){posX + 15 * escala, posY + 12 * escala}, (Vector2){posX + 45 * escala, posY + 12 * escala}, 4 * escala, corOnda);
+            }
+        }
+    }
+
+
+
+
     // Degradê: Oceano -> Pântano (Transição Suave)
     DrawRectangleGradientH(transicao1 - (fade/2.0f), -10000, fade, 20000, corOceano, corPantano);
 
@@ -136,7 +258,117 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte) {
     // Vulcão Sólido (Vai do fim da segunda transição até o infinito)
     DrawRectangle(transicao2 + (fade/2.0f), -10000, 20000, 20000, corVulcao);
 
+    // ========================================================
+    // EFEITO VISUAL: JACARÉS À ESPREITA NO PÂNTANO
+    // ========================================================
+    Color corJacare = (Color){ 10, 30, 15, 120 }; // Verde bem escuro e transparente (silhueta na água turva)
+    Color corOlho = (Color){ 200, 200, 0, 80 };   // Brilho amarelo bem fraco para os olhos
+
+    int espacamentoXJacare = 600 * escala; // Mais espaçados e raros que as ondas
+    int espacamentoYJacare = 250 * escala;
+
+    for (int y = -2000; y <= 2000; y += espacamentoYJacare) {
+        // Deslocamento horizontal alternado para não formarem uma fileira perfeita
+        float offsetLinha = (abs(y / espacamentoYJacare) % 2 == 0) ? 0 : (300 * escala);
+
+        // O loop começa na transicao1 (início do pântano) e vai até um pouco depois da transicao2
+        for (int x = transicao1; x < transicao2 + 1000; x += espacamentoXJacare) {
+
+            // Velocidade lenta e sorrateira (nadando para a esquerda)
+            float velocidade = 20.0f * escala + (abs(y) % 15);
+            float deslocamentoX = fmod(tempo * velocidade, espacamentoXJacare);
+            float posX = x + offsetLinha - deslocamentoX;
+
+            // Só desenha se estiver estritamente dentro da área do pântano
+            if (posX > transicao1 - (fade / 2.0f) && posX < transicao2 + (fade / 2.0f)) {
+
+                // Flutuação geral do corpo
+                float posY = y + sinf(tempo * 1.5f + posX * 0.02f) * (4.0f * escala);
+
+                // 1. Focinho longo (apontando para a esquerda)
+                DrawEllipse(posX - 25 * escala, posY + 4 * escala, 18 * escala, 5 * escala, corJacare);
+
+                // 2. Cabeça e Olhos (protuberância acima da água)
+                DrawCircle(posX - 5 * escala, posY, 6 * escala, corJacare);
+                DrawCircle(posX - 7 * escala, posY - 1 * escala, 2 * escala, corOlho); // Olho sinistro
+
+                // 3. Corpo longo e submerso
+                DrawEllipse(posX + 20 * escala, posY + 4 * escala, 25 * escala, 7 * escala, corJacare);
+
+                // 4. Escamas das costas (pequenas lombadas)
+                DrawCircle(posX + 10 * escala, posY - 1 * escala, 4 * escala, corJacare);
+                DrawCircle(posX + 25 * escala, posY, 4 * escala, corJacare);
+
+                // 5. Rabo sinuoso (move-se independente do corpo para simular nado)
+                float balancoRabo = sinf(tempo * 5.0f + posX * 0.1f) * (6.0f * escala);
+                DrawEllipse(posX + 55 * escala, posY + 5 * escala + balancoRabo, 15 * escala, 3 * escala, corJacare);
+            }
+        }
+    }
+    // ========================================================
+
     tp_no *atual = tabuleiro->ini;
+
+  // ========================================================
+    // EFEITO VISUAL: BOLHAS DE LAVA EXPLODINDO NO VULCÃO
+    // ========================================================
+    Color corBolha = (Color){ 200, 50, 0, 200 };     // Vermelho escuro esfumaçado (borda)
+    Color corBrilho = (Color){ 255, 140, 0, 220 };   // Laranja forte (centro fervendo)
+
+    int espacamentoXB = 250 * escala;
+    int espacamentoYB = 300 * escala;
+
+    // CORREÇÃO DA PAREDE: Aumentado de 5000 para 10000 * escala (Cobre bem além da casa 30)
+    for (int x = transicao2; x < transicao2 + (10000 * escala); x += espacamentoXB) {
+        for (int y = 2000; y >= -2000; y -= espacamentoYB) {
+
+            float semente = x * 11.0f + y * 37.0f;
+            float defasagem = fmod(semente, 100.0f);
+            float pseudoRandX = fmod(semente, 120.0f) * escala;
+
+            // Lava é densa, então a velocidade agora é mais lenta e pesada
+            float velocidadeSubida = 15.0f * escala + fmod(semente, 10.0f);
+
+            float tempoVida = fmod((tempo + defasagem) * velocidadeSubida, espacamentoYB);
+
+            float posX = x + pseudoRandX + sinf(tempo * 2.0f + defasagem) * (15.0f * escala);
+            float posY = y - tempoVida;
+
+            if (posX > transicao2 - (fade / 2.0f)) {
+
+                float progresso = tempoVida / espacamentoYB;
+
+                if (progresso < 0.8f) {
+                    // FASE 1: Bolhas MUITO MAIORES para criar volume no cenário
+                    float raioBase = (15.0f * escala) + (progresso * 40.0f * escala);
+                    DrawCircle(posX, posY, raioBase, corBolha);
+
+                    // O centro alaranjado vai crescendo e engolindo a bolha (prestes a estourar)
+                    DrawCircle(posX - 2*escala, posY - 2*escala, raioBase * (0.2f + progresso*0.6f), corBrilho);
+                } else {
+                    // FASE 2: O Estouro (POP)
+                    float progressoExplosao = (progresso - 0.8f) / 0.2f;
+                    float raioExplosao = 50.0f * escala + (progressoExplosao * 30.0f * escala);
+
+                    unsigned char alpha = (unsigned char)(255 * (1.0f - progressoExplosao));
+                    Color corFade = corBrilho;
+                    corFade.a = alpha;
+
+                    // Desenhando 3 linhas simultâneas para simular um anel de impacto GROSSO
+                    DrawCircleLines(posX, posY, raioExplosao, corFade);
+                    DrawCircleLines(posX, posY, raioExplosao - 1.5f*escala, corFade);
+                    DrawCircleLines(posX, posY, raioExplosao - 3.0f*escala, corFade);
+
+                    // Gotas de lava gigantes voando para fora do impacto
+                    float dist = 20.0f * escala + (progressoExplosao * 40.0f * escala);
+                    DrawCircle(posX - dist, posY - dist, 8*escala, corFade);
+                    DrawCircle(posX + dist, posY - dist*0.4f, 6*escala, corFade);
+                    DrawCircle(posX - dist*0.2f, posY + dist, 9*escala, corFade);
+                }
+            }
+        }
+    }
+    // ========================================================
 
     // 2. DESENHAR AS ILHAS
     while (atual != NULL) {
@@ -183,14 +415,191 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte) {
         const char* numCasa = TextFormat("%d", atual->info.posicao);
         DrawTextEx(fonte, numCasa, (Vector2){px - 15*escala, py + size*1.1f}, 40*escala, 1, WHITE);
 
-        // 3. DESENHAR PEÕES
+        // 3. DESENHAR PEÕES E NICKNAMES (Estilo Minecraft)
         float r = 15 * escala;
-        if (atual->info.cor[0] == 1) DrawCircle(px - 25*escala, py - 25*escala, r, RED);
-        if (atual->info.cor[1] == 1) DrawCircle(px + 25*escala, py - 25*escala, r, GREEN);
-        if (atual->info.cor[2] == 1) DrawCircle(px - 25*escala, py + 25*escala, r, BLUE);
-        if (atual->info.cor[3] == 1) DrawCircle(px + 25*escala, py + 25*escala, r, YELLOW);
+        Vector2 posPeoes[4] = {
+            {px - 25*escala, py - 25*escala}, // P1 (Vermelho)
+            {px + 25*escala, py - 25*escala}, // P2 (Verde)
+            {px - 25*escala, py + 25*escala}, // P3 (Azul)
+            {px + 25*escala, py + 25*escala}  // P4 (Amarelo)
+        };
+        Color corPeoes[4] = {RED, GREEN, BLUE, YELLOW};
+
+        int nomesEmpilhados = 0; // Conta quantos jogadores estão na casa para ir empilhando os textos
+
+        for (int i = 0; i < 4; i++) {
+            // Se o jogador desta cor estiver na casa...
+            if (atual->info.cor[i] == 1) {
+
+                // 3.1 Desenha a bolinha (Peão) do jogador
+                DrawCircle(posPeoes[i].x, posPeoes[i].y, r, corPeoes[i]);
+
+                // 3.2 Desenha a Name Tag (Se ele tiver um nome cadastrado)
+                // 3.2 Desenha a Name Tag (Se ele tiver um nome cadastrado)
+                if (strlen(nomesPorCor[i]) > 0) {
+                    // Tamanho da fonte triplicado (de 18 para 54)
+                    float tamFonteNick = 54 * escala;
+                    Vector2 tamNick = MeasureTextEx(fonte, nomesPorCor[i], tamFonteNick, 1);
+
+                    // Altura base subiu (de 70 para 120) para o texto gigante não engolir o peão
+                    float baseY = py - 120 * escala;
+
+                    // O espaçamento entre textos empilhados também aumentou para 10 de margem
+                    float offsetY = baseY - (nomesEmpilhados * (tamNick.y + 10 * escala));
+
+                    // Margens (padding) do fundo preto aumentadas proporcionalmente
+                    Rectangle bgNick = {
+                        px - tamNick.x/2.0f - 10*escala,
+                        offsetY - 5*escala,
+                        tamNick.x + 20*escala,
+                        tamNick.y + 10*escala
+                    };
+
+                    // Fundo preto com 50% de opacidade
+                    DrawRectangleRec(bgNick, Fade(BLACK, 0.5f));
+                    // Nome do jogador em branco puro por cima
+                    DrawTextEx(fonte, nomesPorCor[i], (Vector2){px - tamNick.x/2.0f, offsetY}, tamFonteNick, 1, WHITE);
+
+                    nomesEmpilhados++;
+                }
+            }
+        }
 
         atual = atual->prox;
+    }
+
+// ========================================================
+    // EFEITO VISUAL: O BARCO DA APROVAÇÃO (FIM DO JOGO)
+    // ========================================================
+    int posFinal = 30; // Posição puramente visual equivalente à "Casa 31"
+    float pxFim = (posFinal * gapX) + (gapX / 2.0f);
+
+    // Segue a curva do mapa, mas o barco flutua na lava independente das casas!
+    float pyFim = centroY + sinf(posFinal * 0.8f) * (150 * escala) + sinf(tempo * 3.0f) * (10.0f * escala);
+
+    // Sombra/Brilho de calor sob o barco (Ferve a lava embaixo dele)
+    DrawEllipse(pxFim, pyFim + 20*escala, 90*escala, 20*escala, (Color){255, 100, 0, 80});
+    DrawEllipse(pxFim, pyFim + 20*escala, 80*escala, 15*escala, (Color){0, 0, 0, 100});
+
+    // Mastro do barco
+    DrawRectangle(pxFim - 5*escala, pyFim - 100*escala, 10*escala, 100*escala, BLACK);
+
+    // Vela Traseira (Esquerda)
+    DrawTriangle((Vector2){pxFim, pyFim - 90*escala},
+                 (Vector2){pxFim - 60*escala, pyFim - 30*escala},
+                 (Vector2){pxFim, pyFim - 30*escala}, RAYWHITE);
+
+    // Vela Dianteira (Direita)
+    DrawTriangle((Vector2){pxFim, pyFim - 80*escala},
+                 (Vector2){pxFim, pyFim - 30*escala},
+                 (Vector2){pxFim + 50*escala, pyFim - 30*escala}, RAYWHITE);
+
+    // Bandeira tremulando no topo do mastro
+    DrawTriangle((Vector2){pxFim + 5*escala, pyFim - 100*escala},
+                 (Vector2){pxFim + 5*escala, pyFim - 80*escala},
+                 (Vector2){pxFim + 35*escala, pyFim - 90*escala}, RED);
+
+    // Casco do Barco (Feito com 3 peças para ter bordas anguladas)
+    DrawRectangle(pxFim - 50*escala, pyFim - 10*escala, 100*escala, 30*escala, DARKBROWN); // Centro
+
+    DrawTriangle((Vector2){pxFim - 80*escala, pyFim - 10*escala},
+                 (Vector2){pxFim - 50*escala, pyFim + 20*escala},
+                 (Vector2){pxFim - 50*escala, pyFim - 10*escala}, DARKBROWN); // Bico Esquerdo
+
+    DrawTriangle((Vector2){pxFim + 50*escala, pyFim - 10*escala},
+                 (Vector2){pxFim + 50*escala, pyFim + 20*escala},
+                 (Vector2){pxFim + 70*escala, pyFim - 10*escala}, DARKBROWN); // Bico Direito
+
+    // Detalhe das tábuas de madeira no casco
+    DrawLineEx((Vector2){pxFim - 70*escala, pyFim}, (Vector2){pxFim + 60*escala, pyFim}, 2*escala, BLACK);
+
+    // Placa Luminosa de "CHEGADA!" acima do mastro
+    const char* txtChegada = "CHEGADA!";
+    Vector2 tamChegada = MeasureTextEx(fonte, txtChegada, 40*escala, 1);
+    Rectangle recChegada = {pxFim - tamChegada.x/2.0f - 10*escala, pyFim - 150*escala, tamChegada.x + 20*escala, tamChegada.y + 10*escala};
+
+    DrawRectangleRounded(recChegada, 0.2f, 10, Fade(BLACK, 0.7f));
+    DrawRectangleRoundedLines(recChegada, 0.2f, 10, 3, GOLD);
+    DrawTextEx(fonte, txtChegada, (Vector2){pxFim - tamChegada.x/2.0f, pyFim - 145*escala}, 40*escala, 1, YELLOW);
+    // ========================================================
+
+}
+
+// Função para processar e desenhar o Ranking coletado do arquivo hank.txt
+void DesenharRankingRaylib(Font fonte, float escala, int largura, int altura) {
+    FILE *arquivo = fopen("hank.txt", "r");
+    if (!arquivo) {
+        DrawTextEx(fonte, "Nenhum dado de ranking encontrado no disco.", (Vector2){largura/2 - 250*escala, altura/2}, 25*escala, 1, RED);
+        return;
+    }
+
+    tp_hank lista[100];
+    int qtd = 0;
+    while (fscanf(arquivo, "%d %d %d %99[^\n]\n", &lista[qtd].acertos, &lista[qtd].erros, &lista[qtd].score, lista[qtd].nome) == 4) {
+        qtd++;
+        if (qtd >= 100) break;
+    }
+    fclose(arquivo);
+
+    // Ordenação clássica Bubble Sort para o Ranking (Maior pontuação primeiro)
+    for (int i = 0; i < qtd - 1; i++) {
+        for (int j = 0; j < qtd - i - 1; j++) {
+            if (lista[j].score < lista[j+1].score) {
+                tp_hank aux = lista[j];
+                lista[j] = lista[j+1];
+                lista[j+1] = aux;
+            }
+        }
+    }
+
+    DrawTextEx(fonte, "RANKING GERAL DOS JOGADORES", (Vector2){largura/2 - 250*escala, altura*0.22f}, 40*escala, 1, GOLD);
+    float y = altura * 0.32f;
+    int limiteExibicao = (qtd < 8) ? qtd : 8; // Mostra o top 8 para não estourar a tela
+
+    for (int i = 0; i < limiteExibicao; i++) {
+        const char* texto = TextFormat("%d. %s  -  Pontos: %d  (Acertos: %d | Erros: %d)", i+1, lista[i].nome, lista[i].score, lista[i].acertos, lista[i].erros);
+        DrawTextEx(fonte, texto, (Vector2){largura/2 - 350*escala, y}, 25*escala, 1, WHITE);
+        y += 45 * escala;
+    }
+}
+
+// Funções auxiliares para extrair os dados da Árvore AVL e listar na tela
+void CopiarDadosAVL(ArvAVL* raiz, tp_estatistica_casa* vetor, int* idx) {
+    if (raiz == NULL || *raiz == NULL || *idx >= 30) return;
+    CopiarDadosAVL(&((*raiz)->esq), vetor, idx);
+    if ((*raiz)->info.vezes_caiu > 0) {
+        vetor[*idx] = (*raiz)->info;
+        (*idx)++;
+    }
+    CopiarDadosAVL(&((*raiz)->dir), vetor, idx);
+}
+
+void DesenharRelatorioAVLRaylib(ArvAVL* arvore, Font fonte, float escala, int largura, int altura) {
+    tp_estatistica_casa visitadas[30];
+    int qtd = 0;
+    CopiarDadosAVL(arvore, visitadas, &qtd);
+
+    DrawTextEx(fonte, "RELATORIO DE USO DAS CASAS (ARVORE AVL O(log n))", (Vector2){largura/2 - 400*escala, altura*0.22f}, 35*escala, 1, SKYBLUE);
+
+    float xEsquerda = largura / 2 - 500 * escala;
+    float xDireita = largura / 2 + 50 * escala;
+    float yBase = altura * 0.32f;
+
+    if (qtd == 0) {
+        DrawTextEx(fonte, "Nenhuma casa recebeu visitas nesta partida.", (Vector2){largura/2 - 250*escala, altura/2}, 25*escala, 1, LIGHTGRAY);
+        return;
+    }
+
+    // Distribui as estatísticas em duas colunas organizadas na tela
+    for (int i = 0; i < qtd; i++) {
+        const char* txt = TextFormat("Casa %02d -> Visitas: %02d | Acertos: %d | Erros: %d",
+                                     visitadas[i].numero_casa, visitadas[i].vezes_caiu,
+                                     visitadas[i].acertos, visitadas[i].erros);
+
+        float posX = (i < 12) ? xEsquerda : xDireita;
+        float posY = yBase + (i % 12) * 40 * escala;
+
+        DrawTextEx(fonte, txt, (Vector2){posX, posY}, 22*escala, 1, WHITE);
     }
 }
 
@@ -232,6 +641,7 @@ int main(void) {
     int numLetras = 0;
     bool coresUsadas[4] = {false, false, false, false}; // R, G, B, Y
     char nomesUsados[4][30];
+    char nomesPorCor[4][30] = {"", "", "", ""}; // Liga a Cor ao Nome para desenhar no mapa
     bool erroNome = false;
 
     // ========================================================
@@ -242,12 +652,24 @@ int main(void) {
 
     DadoInterativo dadoJogo = { {0,0}, {0,0}, 80.0f, false, 6 };
     char mensagemSistema[200] = "O jogo vai comecar!";
+    int subTelaFim = 0; // 0 = Tela de Vitória, 1 = Ranking Geral, 2 = Estatísticas da AVL
+
+    // INICIALIZAÇÃO DA ÁRVORE AVL (NOVO)
+    ArvAVL* arvore = criarAVL();
+    for (int i = 1; i <= 30; i++) {
+        tp_estatistica_casa nova_casa = {i, 0, 0, 0};
+        inserir(arvore, nova_casa);
+    }
 
     // PILHAS DE PERGUNTAS DO BACKEND
     tp_pilha *perguntas_faceis = inicializa_pilha();
     tp_pilha *perguntas_medias = inicializa_pilha();
     tp_pilha *perguntas_faceis_descartadas = inicializa_pilha();
     tp_pilha *perguntas_medias_descartadas = inicializa_pilha();
+    tp_pilha *perguntas_dificeis = inicializa_pilha();
+    tp_pilha *perguntas_dificeis_descartadas = inicializa_pilha();
+    popula_perguntas_d(perguntas_dificeis);
+    embaralhaQuestoes(perguntas_dificeis);
     popula_perguntas(perguntas_faceis);
     embaralhaQuestoes(perguntas_faceis);
     popula_perguntas_m(perguntas_medias);
@@ -357,9 +779,10 @@ int main(void) {
 
         float btnLargo = 200.0f * escala;
         float btnAlto = 60.0f * escala;
-        Rectangle btnIniciar  = { larguraAtual / 2.0f - btnLargo / 2.0f, alturaAtual * 0.45f, btnLargo, btnAlto };
-        Rectangle btnInfo     = { larguraAtual / 2.0f - btnLargo / 2.0f, alturaAtual * 0.58f, btnLargo, btnAlto };
-        Rectangle btnCreditos = { larguraAtual / 2.0f - btnLargo / 2.0f, alturaAtual * 0.71f, btnLargo, btnAlto };
+        Rectangle btnIniciar  = { larguraAtual / 2.0f - btnLargo / 2.0f, alturaAtual * 0.40f, btnLargo, btnAlto };
+        Rectangle btnRanking  = { larguraAtual / 2.0f - btnLargo / 2.0f, alturaAtual * 0.52f, btnLargo, btnAlto };
+        Rectangle btnInfo     = { larguraAtual / 2.0f - btnLargo / 2.0f, alturaAtual * 0.64f, btnLargo, btnAlto };
+        Rectangle btnCreditos = { larguraAtual / 2.0f - btnLargo / 2.0f, alturaAtual * 0.76f, btnLargo, btnAlto };
         Rectangle btnSair     = { larguraAtual - (120.0f * escala), 20.0f * escala, 100.0f * escala, 50.0f * escala };
         Rectangle btnVoltar   = { 20.0f * escala, 20.0f * escala, 120.0f * escala, 50.0f * escala };
         Rectangle btnVolMenos = { 20.0f * escala, alturaAtual - (70.0f * escala), 50.0f * escala, 50.0f * escala };
@@ -411,6 +834,8 @@ int main(void) {
                         strcpy(mensagemSistema, "O jogo vai comecar!");
                         // ========================================================
                     }
+                    else if (CheckCollisionPointRec(mousePoint, btnRanking)) tela = TELA_RANKING;
+                    else if (CheckCollisionPointRec(mousePoint, btnInfo)) tela = TELA_INFORMACOES;
                     else if (CheckCollisionPointRec(mousePoint, btnInfo)) tela = TELA_INFORMACOES;
                     else if (CheckCollisionPointRec(mousePoint, btnCreditos)) tela = TELA_CREDITOS;
                     else if (CheckCollisionPointRec(mousePoint, btnSair)) return 0;
@@ -527,6 +952,7 @@ int main(void) {
                             Player novoJogador;
                             strcpy(novoJogador.nome, nomeDigitado);
                             strcpy(nomesUsados[jogadorAtualCadastro - 1], nomeDigitado);
+                            strcpy(nomesPorCor[corEscolhida - 1], nomeDigitado); // Grava o nome na cor certa
                             novoJogador.cor = corEscolhida;
 
                             inicializa_posicao(&novoJogador, tabuleiroFisico);
@@ -565,6 +991,25 @@ int main(void) {
                     alturaTotalTexto += tamTexto.y + (45.0f * escala);
                 }
                 if (creditosY + alturaTotalTexto < 0) creditosY = alturaAtual;
+                for (int i = 0; i < NUM_ESTRELAS; i++) {
+                    estrelas[i].alfa += estrelas[i].velPiscar * dt;
+                    if (estrelas[i].alfa >= 1.0f) { estrelas[i].alfa = 1.0f; estrelas[i].velPiscar *= -1.0f; }
+                    else if (estrelas[i].alfa <= 0.1f) { estrelas[i].alfa = 0.1f; estrelas[i].velPiscar *= -1.0f; }
+                }
+                break;
+
+            case TELA_RANKING:
+                if (clique && CheckCollisionPointRec(mousePoint, btnVoltar)) tela = TELA_MENU;
+
+                // Botão de Limpar (Apaga os arquivos físicos do computador!)
+                Rectangle btnLimpar = { larguraAtual / 2.0f - 150.0f * escala, alturaAtual * 0.85f, 300.0f * escala, 60.0f * escala };
+                if (clique && CheckCollisionPointRec(mousePoint, btnLimpar)) {
+                    remove("hank.txt");
+                    remove("historico_respostas.csv");
+                    remove("relatorio_casas.txt");
+                }
+
+                // Anima as estrelas do fundo
                 for (int i = 0; i < NUM_ESTRELAS; i++) {
                     estrelas[i].alfa += estrelas[i].velPiscar * dt;
                     if (estrelas[i].alfa >= 1.0f) { estrelas[i].alfa = 1.0f; estrelas[i].velPiscar *= -1.0f; }
@@ -826,8 +1271,19 @@ int main(void) {
                     int venceu = move_posicao(&jogadorDaVez, dadoJogo.valor);
 
                     if (venceu) {
-                        sprintf(mensagemSistema, "PARABENS! %s VENCEU O JOGO!", jogadorDaVez.nome);
-                        estadoJogoAtual = ESTADO_FIM_TURNO;
+                        // Altera a tela principal do jogo e reseta o subsetor visual
+                        tela = TELA_FIM_JOGO;
+                        subTelaFim = 0;
+
+                        // Executa a persistência obrigatória em disco imediatamente
+                        salva_relatorio_casas(arvore);
+                        salva_hank(jogadorDaVez.dados);
+
+                        Player lixo;
+                        while(!fila_vazia(filaJogadores)){
+                            remove_fila(filaJogadores, &lixo);
+                            salva_hank(lixo.dados);
+                        }
                     } else {
                         int tipo = jogadorDaVez.posicao->info.tira_carta;
 
@@ -835,15 +1291,12 @@ int main(void) {
                             int posAtual = jogadorDaVez.posicao->info.posicao;
                             tp_pilha *pilhaAtiva = NULL;
                             tp_pilha *pilhaDescarte = NULL;
-                            char formatado[600] = "";
-                            char temp[300];
-                            char *token;
-                            char linhaCorrente[300] = "";
 
-                            estadoJogoAtual = ESTADO_PERGUNTA;
-                            subEstadoPergunta = 0;
+                            // Registra que o jogador caiu nesta casa na Arvore AVL
+                            registra_passagem(arvore, posAtual, 0, 0);
 
-                            if (posAtual <= 9) {
+                            // Define a dificuldade da pergunta baseada na posicao no tabuleiro
+                            if (posAtual <= 10) {
                                 pilhaAtiva = perguntas_faceis;
                                 pilhaDescarte = perguntas_faceis_descartadas;
                                 casasModificadas = 1;
@@ -852,36 +1305,23 @@ int main(void) {
                                 pilhaDescarte = perguntas_medias_descartadas;
                                 casasModificadas = 2;
                             } else {
-                                pilhaAtiva = perguntas_medias;
-                                pilhaDescarte = perguntas_medias_descartadas;
+                                pilhaAtiva = perguntas_dificeis;
+                                pilhaDescarte = perguntas_dificeis_descartadas;
                                 casasModificadas = 3;
                             }
 
+                            // Transfere descartadas caso a pilha ativa esvazie
                             if (pilha_vazia(pilhaAtiva)) transfere_perguntas(pilhaAtiva, pilhaDescarte);
 
+                            // Puxa a carta do topo
                             pop(pilhaAtiva, &perguntaAtual);
 
-                            strcpy(temp, perguntaAtual.enunciado);
-                            token = strtok(temp, " ");
+                            // Muda a maquina de estados para abrir a HUD da pergunta na tela
+                            estadoJogoAtual = ESTADO_PERGUNTA;
+                            subEstadoPergunta = 0;
 
-                            while (token != NULL) {
-                                char teste[300];
-                                strcpy(teste, linhaCorrente);
-                                strcat(teste, token);
-                                strcat(teste, " ");
 
-                                if (strlen(teste) > 40) {
-                                    strcat(formatado, linhaCorrente);
-                                    strcat(formatado, "\n");
-                                    strcpy(linhaCorrente, token);
-                                    strcat(linhaCorrente, " ");
-                                } else {
-                                    strcpy(linhaCorrente, teste);
-                                }
-                                token = strtok(NULL, " ");
-                            }
-                            strcat(formatado, linhaCorrente);
-                            strcpy(perguntaAtual.enunciado, formatado);
+
 
                         } else if (tipo == 2) {
                             if (jogadorDaVez.qtd_itens < 3) {
@@ -926,12 +1366,14 @@ int main(void) {
                             int casasReais = casasModificadas;
                             if (jogadorDaVez.status_tudo_nada == 1) casasReais *= 2;
 
-                            if (toupper(respostaEscolhida) == perguntaAtual.resposta) {
+                            if (toupper(respostaEscolhida) == perguntaAtual.respostaCorreta) {
                                 acertouPergunta = true;
+                                registra_passagem(arvore, jogadorDaVez.posicao->info.posicao, 1, 0); // <-- REGISTRA ACERTO NA AVL
                                 atualiza_hank(&jogadorDaVez, casasReais * 10);
                                 move_posicao(&jogadorDaVez, casasReais);
                             } else {
                                 acertouPergunta = false;
+                                registra_passagem(arvore, jogadorDaVez.posicao->info.posicao, 0, 1); // <-- REGISTRA ERRO NA AVL
                                 atualiza_hank(&jogadorDaVez, -casasReais * 10);
                                 move_posicao(&jogadorDaVez, -casasReais);
                             }
@@ -991,6 +1433,27 @@ int main(void) {
                     if (dadosInfo[i].pos.y + dadosInfo[i].tamanho > mesaY + mesaH) { dadosInfo[i].pos.y = mesaY + mesaH - dadosInfo[i].tamanho; dadosInfo[i].vel.y *= -0.8f; }
                 }
                 break;
+
+            case TELA_FIM_JOGO:
+                {
+                    float btnW = 250.0f * escala;
+                    float btnH = 60.0f * escala;
+                    float centerY = alturaAtual * 0.85f; // Alinhamento inferior dos botões
+
+                    Rectangle rMenu    = { larguraAtual/2.0f - 400*escala, centerY, btnW, btnH };
+                    Rectangle rRanking = { larguraAtual/2.0f - 125*escala, centerY, btnW, btnH };
+                    Rectangle rReport  = { larguraAtual/2.0f + 150*escala, centerY, btnW, btnH };
+
+                    if (clique) {
+                        if (CheckCollisionPointRec(mousePoint, rMenu)) {
+                            tela = TELA_MENU; // Voltar ao menu principal
+                            primeiraVez = true; // Reseta as animações de fundo
+                        }
+                        else if (CheckCollisionPointRec(mousePoint, rRanking)) subTelaFim = 1; // Alterna para aba Ranking
+                        else if (CheckCollisionPointRec(mousePoint, rReport)) subTelaFim = 2;  // Alterna para aba Relatório
+                    }
+                }
+                break;
         }
 
         if (tela != TELA_CREDITOS) creditosY = alturaAtual;
@@ -1009,7 +1472,7 @@ int main(void) {
         // ==========================================
         BeginDrawing();
         if (tela == TELA_MENU) ClearBackground(SKYBLUE);
-        else if (tela == TELA_CREDITOS) ClearBackground(BLACK);
+        else if (tela == TELA_CREDITOS || tela == TELA_RANKING) ClearBackground(BLACK);
         else ClearBackground(GRAY);
 
         switch (tela) {
@@ -1029,7 +1492,6 @@ int main(void) {
 
                 for (int i = 0; i < NUM_CORREDORES; i++) DrawRectangle(corredores[i].pos.x, corredores[i].pos.y, tamanhoQuadrado, tamanhoQuadrado, corredores[i].cor);
 
-                Rectangle rectTitulo = { larguraAtual / 2.0f - (130.0f * escala), alturaAtual * 0.05f, 260.0f * escala, 80.0f * escala };
                 const char* t1 = "Caminho do";
                 const char* t2 = "conhecimento";
                 Vector2 tam1 = MeasureTextEx(fonteOffbit, t1, tamFonteTitulo, 1);
@@ -1053,6 +1515,10 @@ int main(void) {
 
                 DesenharBotaoCentralizado(btnIniciar, "Iniciar", fonteOffbit, tamFonteBotoes);
                 if (CheckCollisionPointRec(mousePoint, btnIniciar)) DrawRectangleRoundedLines(btnIniciar, 0.4f, 10, 3, WHITE);
+
+                DesenharBotaoCentralizado(btnRanking, "Ranking", fonteOffbit, tamFonteBotoes);
+                if (CheckCollisionPointRec(mousePoint, btnRanking)) DrawRectangleRoundedLines(btnRanking, 0.4f, 10, 3, WHITE);
+
 
                 DesenharBotaoCentralizado(btnInfo, "Informações", fonteOffbit, tamFonteBotoes);
                 if (CheckCollisionPointRec(mousePoint, btnInfo)) DrawRectangleRoundedLines(btnInfo, 0.4f, 10, 3, WHITE);
@@ -1143,6 +1609,25 @@ int main(void) {
                 }
                 break;
 
+            case TELA_RANKING:
+                // Fundo estrelado
+                for (int i = 0; i < NUM_ESTRELAS; i++) {
+                    float x = fmod(estrelas[i].pos.x, larguraAtual);
+                    float y = fmod(estrelas[i].pos.y, alturaAtual);
+                    DrawCircle(x, y, estrelas[i].raio * escala, Fade(WHITE, estrelas[i].alfa));
+                }
+
+                // Reutiliza a função que já lê e organiza o HD!
+                DesenharRankingRaylib(fonteOffbit, escala, larguraAtual, alturaAtual);
+
+                // Desenha o botão de limpar histórico
+                {
+                    Rectangle btnLimpar = { larguraAtual / 2.0f - 150.0f * escala, alturaAtual * 0.85f, 300.0f * escala, 60.0f * escala };
+                    DesenharBotaoCentralizado(btnLimpar, "Limpar Historico", fonteOffbit, 30 * escala);
+                    if (CheckCollisionPointRec(mousePoint, btnLimpar)) DrawRectangleRoundedLines(btnLimpar, 0.4f, 10, 3, RED);
+                }
+                break;
+
             case TELA_INFORMACOES:
                 DrawTextEx(fonteOffbit, "COMO JOGAR", (Vector2){ (larguraAtual - MeasureTextEx(fonteOffbit, "COMO JOGAR", 40 * escala, 1).x) / 2.0f, alturaAtual * 0.08f }, 40 * escala, 1, BLACK);
                 float textoX = larguraAtual * 0.25f;
@@ -1168,9 +1653,57 @@ int main(void) {
                 DesenharDadoFace(dadosInfo[1].pos.x, dadosInfo[1].pos.y, dadosInfo[1].tamanho, dadosInfo[1].valor, escala);
                 break;
 
+            case TELA_FIM_JOGO:
+                ClearBackground(BLACK); // Fundo escuro elegante de fim de jogo
+
+                // Desenha estrelas de fundo para dar uma textura bonita
+                for (int i = 0; i < NUM_ESTRELAS; i++) {
+                    float x = fmod(estrelas[i].pos.x, larguraAtual);
+                    float y = fmod(estrelas[i].pos.y, alturaAtual);
+                    DrawCircle(x, y, estrelas[i].raio * escala, Fade(WHITE, estrelas[i].alfa));
+                }
+
+                // Renderização condicional baseada na aba selecionada
+                if (subTelaFim == 0) {
+                    const char* txtFim = "PARABENS! PARTIDA CONCLUIDA!";
+                    const char* txtVencedor = TextFormat("O JOGADOR %s CONQUISTOU A APROVACAO!", jogadorDaVez.nome);
+
+                    DrawTextEx(fonteOffbit, txtFim, (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, txtFim, 50*escala, 1).x/2.0f, alturaAtual*0.35f}, 50*escala, 1, GREEN);
+                    DrawTextEx(fonteOffbit, txtVencedor, (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, txtVencedor, 35*escala, 1).x/2.0f, alturaAtual*0.48f}, 35*escala, 1, WHITE);
+                }
+                else if (subTelaFim == 1) {
+                    DesenharRankingRaylib(fonteOffbit, escala, larguraAtual, alturaAtual);
+                }
+                else if (subTelaFim == 2) {
+                    DesenharRelatorioAVLRaylib(arvore, fonteOffbit, escala, larguraAtual, alturaAtual);
+                }
+
+                // Desenho estilizado dos Botões inferiores de navegação
+                {
+                    float btnW = 250.0f * escala;
+                    float btnH = 60.0f * escala;
+                    float centerY = alturaAtual * 0.85f;
+
+                    Rectangle rMenu    = { larguraAtual/2.0f - 400*escala, centerY, btnW, btnH };
+                    Rectangle rRanking = { larguraAtual/2.0f - 125*escala, centerY, btnW, btnH };
+                    Rectangle rReport  = { larguraAtual/2.0f + 150*escala, centerY, btnW, btnH };
+
+                    DesenharBotaoCentralizado(rMenu, "Voltar ao Menu", fonteOffbit, 25*escala);
+                    if (CheckCollisionPointRec(mousePoint, rMenu)) DrawRectangleRoundedLines(rMenu, 0.4f, 10, 3, WHITE);
+
+                    DesenharBotaoCentralizado(rRanking, "Ver Ranking", fonteOffbit, 25*escala);
+                    if (subTelaFim == 1) DrawRectangleRoundedLines(rRanking, 0.4f, 10, 3, GOLD);
+                    else if (CheckCollisionPointRec(mousePoint, rRanking)) DrawRectangleRoundedLines(rRanking, 0.4f, 10, 3, WHITE);
+
+                    DesenharBotaoCentralizado(rReport, "Ver Relatorio AVL", fonteOffbit, 25*escala);
+                    if (subTelaFim == 2) DrawRectangleRoundedLines(rReport, 0.4f, 10, 3, SKYBLUE);
+                    else if (CheckCollisionPointRec(mousePoint, rReport)) DrawRectangleRoundedLines(rReport, 0.4f, 10, 3, WHITE);
+                }
+                break;
+
             case TELA_JOGO:
                 BeginMode2D(camera);
-                DesenharCaminhoAED(tabuleiroFisico, escala, fonteOffbit);
+                DesenharCaminhoAED(tabuleiroFisico, escala, fonteOffbit, nomesPorCor);
                 EndMode2D();
 
                 if (turnoIniciado) {
@@ -1243,8 +1776,8 @@ int main(void) {
                         DrawTextEx(fonteOffbit, tituloUni, (Vector2){modal.x + 20*escala, modal.y + 20*escala}, 40*escala, 1, DARKBLUE);
                         DrawTextEx(fonteOffbit, "(Use os numeros 1, 2, 3, 4 ou as letras V e F no teclado)", (Vector2){modal.x + 20*escala, modal.y + 60*escala}, 20*escala, 1, GRAY);
 
-                        // Desenha o texto que foi formatado no backend
-                        DrawTextEx(fonteOffbit, perguntaAtual.enunciado, (Vector2){modal.x + 40*escala, modal.y + 120*escala}, 30*escala, 1, BLACK);
+                        // Usa a nossa nova função inteligente para desenhar o texto
+                        DesenharPerguntaFormatada(fonteOffbit, perguntaAtual.enunciado, (Vector2){modal.x + 40*escala, modal.y + 120*escala}, 30*escala, escala);
 
                     } else if (subEstadoPergunta == 1) {
                         const char *tituloRes = acertouPergunta ? "RESPOSTA CORRETA!" : "RESPOSTA ERRADA!";
