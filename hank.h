@@ -7,11 +7,15 @@
 #include "arvavlr.h"
 #include "tipos.h"
 
-// Mantemos isso para inicializar o jogador (não afeta a árvore)
+// Mantemos isso para inicializar o jogador
 int inicializa_hank(Player *jogador){
     jogador->dados.acertos = 0;
     jogador->dados.erros = 0;
     jogador->dados.score = 0;
+
+    // CORREÇÃO: Copia o nome do jogador para a estrutura de dados que será salva no txt!
+    strcpy(jogador->dados.nome, jogador->nome);
+
     return 1;
 }
 
