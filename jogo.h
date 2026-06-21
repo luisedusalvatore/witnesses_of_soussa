@@ -17,12 +17,12 @@
 #include "listade.h"
 #include "tabuleiro.h"
 #include "hank.h"
+#include "historico.h"
 
 int roda_jogo(){
     // ==========================================
     // NOVA INICIALIZAÇÃO DO RANKING (AVL)
     // ==========================================
-    ArvAVL arvore = NULL;
 
     srand(time(NULL));
     int quant;         // quantidade de jogadores
@@ -43,6 +43,9 @@ int roda_jogo(){
 
     // preenche o tabuleiro com a quantidade de casas que decidirmos por no jogo
     inicia_tabuleiro(tabuleiro, 20);
+
+    // cria o arquivo CSV de historico com o cabecalho (so executa se o arquivo nao existir)
+    inicializa_historico();
 
     // popula e embaralha as cartas
     popula_perguntas(perguntas_faceis);
