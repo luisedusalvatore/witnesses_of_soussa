@@ -11,6 +11,7 @@
 #include "tipos.h"
 #include "tabuleiro.h"
 #include "hank.h"
+#include "historico.h"
 
 // declaração previa do prototipo da função de imprimir a opção dos itens ( estava dando erro de implicit sem ela)
 void imprime_nome_item(int id);
@@ -249,6 +250,9 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
     Player jogador;
     int venceu = 0;
     int resposta;
+    // variaveis para capturar a pergunta e resposta e salvar no historico
+    tp_pergunta pergunta_atual;
+    char resp_jogador;
 
     // retira o jogador da vez da fila
     remove_fila(jogadores, &jogador);
@@ -496,13 +500,15 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
     system("cls"); // limpa a tela para dar a ilusão de animação
     imprime_tabuleiro_visual(tabuleiro);
 
-    printf("\n>>> %s tirou %d no dado e avancou para a Casa %d! <<<\n", jogador.nome, valor_dado, jogador.posicao->info.posicao);
-
+    // CORRECAO: checar venceu ANTES de acessar posicao->info.posicao
+    // Quando venceu==1, posicao é NULL (saiu do tabuleiro) e o acesso causava segfault
     if (venceu == 1) {
+        printf("\n>>> %s tirou %d no dado e CHEGOU AO FIM DO TABULEIRO! <<<\n", jogador.nome, valor_dado);
         printf("\n>>> PARABENS! %s ALCANCOU A CHEGADA E VENCEU O JOGO! <<<\n", jogador.nome);
         return 1;
     }
 
+    printf("\n>>> %s tirou %d no dado e avancou para a Casa %d! <<<\n", jogador.nome, valor_dado, jogador.posicao->info.posicao);
     printf("%s avancou para a Casa %d.\n", jogador.nome, jogador.posicao->info.posicao);
 
     // verifica se a casa atual tem pergunta ou baú
@@ -511,27 +517,31 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
 
         if (jogador.posicao->info.posicao <= 10) {
             printf("[Nivel: FACIL]\n");
-            resposta = geraPergunta(perguntas_faceis, perguntas_faceis_descartadas);
+            resposta = geraPerguntaComHistorico(perguntas_faceis, perguntas_faceis_descartadas, &pergunta_atual, &resp_jogador);
             if (resposta == 1) {
                 printf("Voce acertou! Bonus: Avance 1 casa extra.\n");
                 atualiza_hank(&jogador, 10);
+                salvarHistoricoResposta(jogador.nome, pergunta_atual, resp_jogador, "Acertou");
                 venceu = move_posicao(&jogador, 1);
             } else {
                 printf("Voce errou! Penalidade: Volte 1 casa.\n");
                 atualiza_hank(&jogador, -10);
+                salvarHistoricoResposta(jogador.nome, pergunta_atual, resp_jogador, "Errou");
                 move_posicao(&jogador, -1);
             }
         }
         else {
             printf("[Nivel: MEDIO]\n");
-            resposta = geraPergunta(perguntas_medias, perguntas_medias_descartadas);
+            resposta = geraPerguntaComHistorico(perguntas_medias, perguntas_medias_descartadas, &pergunta_atual, &resp_jogador);
             if (resposta == 1) {
                 printf("Voce acertou! Bonus: Avance 2 casas extras.\n");
                 atualiza_hank(&jogador, 20);
+                salvarHistoricoResposta(jogador.nome, pergunta_atual, resp_jogador, "Acertou");
                 venceu = move_posicao(&jogador, 2);
             } else {
                 printf("Voce errou! Penalidade: Volte 2 casas.\n");
                 atualiza_hank(&jogador, -20);
+                salvarHistoricoResposta(jogador.nome, pergunta_atual, resp_jogador, "Errou");
                 move_posicao(&jogador, -2);
             }
         }
@@ -577,4 +587,4 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
 }
 
 #endif
- 
+
