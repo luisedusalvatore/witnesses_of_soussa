@@ -37,7 +37,7 @@ int eh_binario(int posi){
     // armazena os elementos na pilha
     for (int i = 0; i < tam; i++) {
         tp_item_pilha n;
-        n.resposta = vetor[i];
+        n.respostaCorreta = vetor[i];
         push(pilha, n);
     }
 
@@ -48,7 +48,7 @@ int eh_binario(int posi){
 
         pop(pilha, &e);
 
-        if (vetor[i] != e.resposta) {
+        if (vetor[i] != e.respostaCorreta) {
             eh_palindromo = 0; // Não é um palíndromo
             break;
         }
