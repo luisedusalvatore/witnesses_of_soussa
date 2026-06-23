@@ -969,13 +969,20 @@ int main(void) {
                                 erroNome = true;
                             } else {
                                 // O GATILHO DOS 11 EASTER EGGS!
-                                if (strcmp(nomeDigitado, "andre") == 0) easterEggAtivo = 0;
+                                if (strcmp(nomeDigitado, "andre") == 0){
+                                    easterEggAtivo = 0;
+                                    PlaySoundEffect(3);
+                                    
+                                } 
                                 else if (strcmp(nomeDigitado, "carlos") == 0) easterEggAtivo = 1;
                                 else if (strcmp(nomeDigitado, "formigao") == 0) easterEggAtivo = 2;
                                 else if (strcmp(nomeDigitado, "gerek") == 0) easterEggAtivo = 3;
                                 else if (strcmp(nomeDigitado, "lucas") == 0) easterEggAtivo = 4;
                                 else if (strcmp(nomeDigitado, "luis") == 0) easterEggAtivo = 5;
-                                else if (strcmp(nomeDigitado, "sanval") == 0) easterEggAtivo = 6;
+                                else if (strcmp(nomeDigitado, "sanval") == 0){
+                                    easterEggAtivo = 6;
+                                    PlaySoundEffect(2);
+                                } 
                                 else if (strcmp(nomeDigitado, "seugosti") == 0) easterEggAtivo = 7;
                                 else if (strcmp(nomeDigitado, "soussa") == 0) easterEggAtivo = 8;
                                 else if (strcmp(nomeDigitado, "marcel") == 0) easterEggAtivo = 9;
@@ -1276,6 +1283,7 @@ int main(void) {
                                     dadoJogo.segurando = false;
                                     if (fabs(dadoJogo.vel.x) > 50 || fabs(dadoJogo.vel.y) > 50) {
                                         estadoJogoAtual = ESTADO_ANIMANDO_DADO;
+                                        PlaySoundEffect(0);
                                         strcpy(mensagemSistema, "Rolando...");
                                     }
                                 }
@@ -1346,6 +1354,7 @@ int main(void) {
 
                     if (progressoPulo >= 1.0f) {
                         progressoPulo = 0.0f;
+                        PlaySoundEffect(1);
                         int venceuAnim = move_posicao(&jogadorDaVez, direcaoAnimacao);
                         casasRestantesAnimacao -= direcaoAnimacao; // Desconta um passo
 
@@ -1520,6 +1529,7 @@ int main(void) {
                         dadosInfo[i].vel.x = delta.x * 15.0f;
                         dadosInfo[i].vel.y = delta.y * 15.0f;
                         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) dadosInfo[i].segurando = false;
+                        PlaySoundEffect(0);
                     } else {
                         dadosInfo[i].pos.x += dadosInfo[i].vel.x * dt;
                         dadosInfo[i].pos.y += dadosInfo[i].vel.y * dt;
@@ -1560,14 +1570,27 @@ int main(void) {
 
         if (tela != TELA_CREDITOS) creditosY = alturaAtual;
 
-        // MUSICAS
+        // ==========================================
+        // TOCAR MUSICAS
+        // ==========================================
         static TelaAtual telaAnterior = (TelaAtual)-1;
-        if (tela != telaAnterior) {
-            if (tela == TELA_MENU && telaAnterior == TELA_CREDITOS) PlayMusicTrack(0);
-            else if (tela == TELA_CREDITOS) PlayMusicTrack(1);
-            telaAnterior = tela;
-        }
-        UpdateAudioSystem();
+                if (tela != telaAnterior) {
+                
+                    if ((tela == TELA_MENU && telaAnterior == TELA_CREDITOS) || 
+                        (tela == TELA_MENU && telaAnterior == TELA_FIM_JOGO)) {
+                        PlayMusicTrack(0);
+                    } 
+                    else if (tela == TELA_CREDITOS) {
+                        PlayMusicTrack(1);
+                    } 
+                    else if (tela == TELA_FIM_JOGO) {
+                        PlayMusicTrack(2);
+                    }
+                    telaAnterior = tela; 
+                }
+                
+                
+                UpdateAudioSystem();
 
         // ==========================================
         // SWITCH 2: RENDERIZAÇÃO (DRAW)
