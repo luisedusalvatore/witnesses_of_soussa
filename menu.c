@@ -23,6 +23,7 @@ typedef enum {
     ESTADO_ESPERANDO_DADO,
     ESTADO_ANIMANDO_DADO,
     ESTADO_REROL,
+    ESTADO_ANIMANDO_PEAO,
     ESTADO_MOVENDO,
     ESTADO_ACAO_CASA,
     ESTADO_PERGUNTA,
@@ -168,6 +169,15 @@ void DesenharPerguntaFormatada(Font fonte, const char* texto, Vector2 pos, float
         if (proxLinha == NULL) break;
         ptr = proxLinha + 1;
     }
+}
+
+// Calcula a posição (X, Y) exata de qualquer casa no mapa
+void ObterPosicaoIlha(int numeroCasa, float escala, float *outX, float *outY) {
+    float gapX = 400 * escala;
+    float centroY = 0.0f;
+    int pos = numeroCasa - 1;
+    *outX = (pos * gapX) + (gapX / 2.0f);
+    *outY = centroY + sinf(pos * 0.8f) * (150 * escala);
 }
 
 void DesenharDadoFace(float x, float y, float size, int valor, float escala) {
@@ -375,9 +385,9 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
         int pos = atual->info.posicao - 1; // Índice 0 a 29
         int bioma = pos / 10;              // 0 (Oceano), 1 (Pântano), 2 (Vulcão)
 
-        // Posição no Mundo: Eixo X contínuo, Eixo Y com uma leve onda seno para ficar charmoso!
-        float px = (pos * gapX) + (gapX / 2.0f);
-        float py = centroY + sinf(pos * 0.8f) * (150 * escala);
+        // Posição no Mundo calculada pela função auxiliar para sincronizar com a animação
+        float px, py;
+        ObterPosicaoIlha(atual->info.posicao, escala, &px, &py);
 
         // Cor base da ilha
         DrawCircle(px, py, size, DARKBROWN);
@@ -612,6 +622,17 @@ int main(void) {
 
     InitWindow(screenWidth, screenHeight, "Caminho do Conhecimento - Navegação");
     Font fonteOffbit = LoadFontEx("offbit.ttf", 80, 0, 250);
+    Texture2D imgResenha = LoadTexture("assets/andre.png");
+    Texture2D imgResenha1 = LoadTexture("assets/carlos.png");
+    Texture2D imgResenha2 = LoadTexture("assets/formigao.png");
+    Texture2D imgResenha3 = LoadTexture("assets/gerek.png");
+    Texture2D imgResenha4 = LoadTexture("assets/lucas.png");
+    Texture2D imgResenha5 = LoadTexture("assets/luis.png");
+    Texture2D imgResenha6 = LoadTexture("assets/sanval.png");
+    Texture2D imgResenha7 = LoadTexture("assets/seugosti.png");
+    Texture2D imgResenha8 = LoadTexture("assets/soussa.png");
+    Texture2D imgResenha9 = LoadTexture("assets/marcel.png");
+    Texture2D imgResenha10 = LoadTexture("assets/eduardo.png");
     SetTargetFPS(60);
 
     InitAudioSystem();
@@ -643,6 +664,8 @@ int main(void) {
     char nomesUsados[4][30];
     char nomesPorCor[4][30] = {"", "", "", ""}; // Liga a Cor ao Nome para desenhar no mapa
     bool erroNome = false;
+    int easterEggAtivo = -1; // -1 significa nenhum. 0 a 10 são as imagens.
+    float timerEasterEgg = 0.0f;
 
     // ========================================================
     // VARIÁVEIS DA MÁQUINA DE ESTADOS E SISTEMA DE PERGUNTAS
@@ -683,6 +706,13 @@ int main(void) {
     int itemSorteado = 0;        // NOVO: Guarda o ID do item pego no bau
     // ========================================================
 
+    // Variáveis da Animação de Pulo
+    int casasRestantesAnimacao = 0;
+    int direcaoAnimacao = 1;
+    float progressoPulo = 0.0f;
+    int pulosExtras = 0;
+    EstadoJogo proximoEstadoPosAnimacao = ESTADO_MOVENDO;
+    // ========================================================
 
     // VARIÁVEIS DO MENU PRINCIPAL (Que tinham sido apagadas)
     float posNuvem1 = screenWidth * 0.25f;
@@ -899,37 +929,66 @@ int main(void) {
                         else if (CheckCollisionPointRec(mousePoint, btn4)) { qtdJogadoresConfig = 4; estadoCadastro = 1; }
                     }
                 } else if (estadoCadastro == 1) {
-                    int key = GetCharPressed();
-                    while (key > 0) {
-                        if ((key >= 32) && (key <= 125) && (numLetras < 20)) {
-                            nomeDigitado[numLetras] = (char)key;
-                            nomeDigitado[numLetras+1] = '\0';
-                            numLetras++;
-                        }
-                        key = GetCharPressed();
-                    }
-                    if (IsKeyPressed(KEY_BACKSPACE)) {
-                        numLetras--;
-                        if (numLetras < 0) numLetras = 0;
-                        nomeDigitado[numLetras] = '\0';
-                        erroNome = false;
-                    }
-                    if (key > 0) erroNome = false;
-
-                    Rectangle btnAvancar = {larguraAtual/2.0f - 100*escala, alturaAtual*0.65f, 200*escala, 60*escala};
-                    if (clique && CheckCollisionPointRec(mousePoint, btnAvancar) && numLetras > 0) {
-                        bool nomeRepetido = false;
-                        for (int i = 0; i < jogadorAtualCadastro - 1; i++) {
-                            if (strcmp(nomeDigitado, nomesUsados[i]) == 0) {
-                                nomeRepetido = true;
-                                break;
-                            }
-                        }
-                        if (nomeRepetido) {
-                            erroNome = true;
-                        } else {
-                            estadoCadastro = 2;
+                    // SE ALGUM EASTER EGG FOI ATIVADO, SÓ ESPERA O TEMPO PASSAR!
+                    if (easterEggAtivo != -1) {
+                        timerEasterEgg -= dt;
+                        if (timerEasterEgg <= 0.0f) {
+                            easterEggAtivo = -1; // Desliga a imagem
+                            estadoCadastro = 2;  // Avança para a escolha de cor
                             erroNome = false;
+                        }
+                    } else {
+                        // LÓGICA NORMAL DE DIGITAÇÃO
+                        int key = GetCharPressed();
+                        while (key > 0) {
+                            if ((key >= 32) && (key <= 125) && (numLetras < 20)) {
+                                nomeDigitado[numLetras] = (char)key;
+                                nomeDigitado[numLetras+1] = '\0';
+                                numLetras++;
+                            }
+                            key = GetCharPressed();
+                        }
+                        if (IsKeyPressed(KEY_BACKSPACE)) {
+                            numLetras--;
+                            if (numLetras < 0) numLetras = 0;
+                            nomeDigitado[numLetras] = '\0';
+                            erroNome = false;
+                        }
+                        if (key > 0) erroNome = false;
+
+                        Rectangle btnAvancar = {larguraAtual/2.0f - 100*escala, alturaAtual*0.65f, 200*escala, 60*escala};
+                        if (clique && CheckCollisionPointRec(mousePoint, btnAvancar) && numLetras > 0) {
+                            bool nomeRepetido = false;
+                            for (int i = 0; i < jogadorAtualCadastro - 1; i++) {
+                                if (strcmp(nomeDigitado, nomesUsados[i]) == 0) {
+                                    nomeRepetido = true;
+                                    break;
+                                }
+                            }
+                            if (nomeRepetido) {
+                                erroNome = true;
+                            } else {
+                                // O GATILHO DOS 11 EASTER EGGS!
+                                if (strcmp(nomeDigitado, "andre") == 0) easterEggAtivo = 0;
+                                else if (strcmp(nomeDigitado, "carlos") == 0) easterEggAtivo = 1;
+                                else if (strcmp(nomeDigitado, "formigao") == 0) easterEggAtivo = 2;
+                                else if (strcmp(nomeDigitado, "gerek") == 0) easterEggAtivo = 3;
+                                else if (strcmp(nomeDigitado, "lucas") == 0) easterEggAtivo = 4;
+                                else if (strcmp(nomeDigitado, "luis") == 0) easterEggAtivo = 5;
+                                else if (strcmp(nomeDigitado, "sanval") == 0) easterEggAtivo = 6;
+                                else if (strcmp(nomeDigitado, "seugosti") == 0) easterEggAtivo = 7;
+                                else if (strcmp(nomeDigitado, "soussa") == 0) easterEggAtivo = 8;
+                                else if (strcmp(nomeDigitado, "marcel") == 0) easterEggAtivo = 9;
+                                else if (strcmp(nomeDigitado, "eduardo") == 0) easterEggAtivo = 10;
+
+                                // Se ele ativou alguma ID:
+                                if (easterEggAtivo != -1) {
+                                    timerEasterEgg = 3.0f; // Exibe a imagem por 3 segundos
+                                } else {
+                                    estadoCadastro = 2; // Jogador normal, segue a vida
+                                    erroNome = false;
+                                }
+                            }
                         }
                     }
                 } else if (estadoCadastro == 2) {
@@ -952,7 +1011,7 @@ int main(void) {
                             Player novoJogador;
                             strcpy(novoJogador.nome, nomeDigitado);
                             strcpy(nomesUsados[jogadorAtualCadastro - 1], nomeDigitado);
-                            strcpy(nomesPorCor[corEscolhida - 1], nomeDigitado); // Grava o nome na cor certa
+                            strcpy(nomesPorCor[corEscolhida - 1], nomeDigitado);
                             novoJogador.cor = corEscolhida;
 
                             inicializa_posicao(&novoJogador, tabuleiroFisico);
@@ -1245,7 +1304,12 @@ int main(void) {
                             if (jogadorDaVez.status_rerol == 1) {
                                 estadoJogoAtual = ESTADO_REROL;
                             } else {
-                                estadoJogoAtual = ESTADO_MOVENDO;
+                                casasRestantesAnimacao = dadoJogo.valor;
+                                direcaoAnimacao = 1;
+                                progressoPulo = 0.0f;
+                                jogadorDaVez.posicao->info.cor[jogadorDaVez.cor - 1] = 0; // Esconde do tabuleiro
+                                proximoEstadoPosAnimacao = ESTADO_MOVENDO;
+                                estadoJogoAtual = ESTADO_ANIMANDO_PEAO;
                             }
                         }
                     }
@@ -1263,12 +1327,45 @@ int main(void) {
                     }
                     if (clique && CheckCollisionPointRec(mousePoint, btnNao)) {
                         jogadorDaVez.status_rerol = 0;
-                        estadoJogoAtual = ESTADO_MOVENDO;
+                        casasRestantesAnimacao = dadoJogo.valor;
+                        direcaoAnimacao = 1;
+                        progressoPulo = 0.0f;
+                        jogadorDaVez.posicao->info.cor[jogadorDaVez.cor - 1] = 0; // Esconde do tabuleiro
+                        proximoEstadoPosAnimacao = ESTADO_MOVENDO;
+                        estadoJogoAtual = ESTADO_ANIMANDO_PEAO;
+                    }
+                }
+
+               if (estadoJogoAtual == ESTADO_ANIMANDO_PEAO) {
+                    progressoPulo += dt * 2.5f; // Velocidade: 2.5 pulos por segundo
+
+                    // Efeito extra: Câmera segue o jogador pulando!
+                    float alvoCamX, alvoCamY;
+                    ObterPosicaoIlha(jogadorDaVez.posicao->info.posicao, escala, &alvoCamX, &alvoCamY);
+                    camera.target.x += (alvoCamX - camera.target.x) * 4.0f * dt;
+
+                    if (progressoPulo >= 1.0f) {
+                        progressoPulo = 0.0f;
+                        int venceuAnim = move_posicao(&jogadorDaVez, direcaoAnimacao);
+                        casasRestantesAnimacao -= direcaoAnimacao; // Desconta um passo
+
+                        if (casasRestantesAnimacao == 0 || venceuAnim == 1) {
+                            // Fim dos pulos! Mostra o peão fixo novamente na última ilha
+                            if (jogadorDaVez.posicao != NULL) jogadorDaVez.posicao->info.cor[jogadorDaVez.cor - 1] = 1;
+
+                            // Se venceu durante uma animação, rouba o estado para declarar vitória
+                            if (venceuAnim == 1) estadoJogoAtual = ESTADO_MOVENDO;
+                            else estadoJogoAtual = proximoEstadoPosAnimacao;
+                        } else {
+                            // CORREÇÃO DO FANTASMA: Se ainda tem pulos pela frente, esconde o peão imediatamente da nova casa!
+                            if (jogadorDaVez.posicao != NULL) jogadorDaVez.posicao->info.cor[jogadorDaVez.cor - 1] = 0;
+                        }
                     }
                 }
 
                 if (estadoJogoAtual == ESTADO_MOVENDO) {
-                    int venceu = move_posicao(&jogadorDaVez, dadoJogo.valor);
+                    // Agora o ESTADO_MOVENDO serve apenas para checar ONDE o jogador aterrissou!
+                    int venceu = (jogadorDaVez.posicao == NULL);
 
                     if (venceu) {
                         // Altera a tela principal do jogo e reseta o subsetor visual
@@ -1370,12 +1467,12 @@ int main(void) {
                                 acertouPergunta = true;
                                 registra_passagem(arvore, jogadorDaVez.posicao->info.posicao, 1, 0); // <-- REGISTRA ACERTO NA AVL
                                 atualiza_hank(&jogadorDaVez, casasReais * 10);
-                                move_posicao(&jogadorDaVez, casasReais);
+                                pulosExtras = casasReais;
                             } else {
                                 acertouPergunta = false;
                                 registra_passagem(arvore, jogadorDaVez.posicao->info.posicao, 0, 1); // <-- REGISTRA ERRO NA AVL
                                 atualiza_hank(&jogadorDaVez, -casasReais * 10);
-                                move_posicao(&jogadorDaVez, -casasReais);
+                                pulosExtras = -casasReais;
                             }
 
                             jogadorDaVez.status_tudo_nada = 0;
@@ -1388,7 +1485,12 @@ int main(void) {
                     } else if (subEstadoPergunta == 1) {
                         Rectangle btnCont = {larguraAtual/2.0f - 100*escala, alturaAtual/2.0f + 150*escala, 200*escala, 60*escala};
                         if (clique && CheckCollisionPointRec(mousePoint, btnCont)) {
-                            estadoJogoAtual = ESTADO_FIM_TURNO;
+                            casasRestantesAnimacao = pulosExtras;
+                            direcaoAnimacao = (pulosExtras > 0) ? 1 : -1;
+                            progressoPulo = 0.0f;
+                            jogadorDaVez.posicao->info.cor[jogadorDaVez.cor - 1] = 0; // Oculta
+                            proximoEstadoPosAnimacao = ESTADO_FIM_TURNO;
+                            estadoJogoAtual = ESTADO_ANIMANDO_PEAO;
                         }
                     }
                 }
@@ -1556,21 +1658,52 @@ int main(void) {
                 } else if (estadoCadastro == 1) {
                     const char* tituloJogador = TextFormat("JOGADOR %d", jogadorAtualCadastro);
                     DrawTextEx(fonteOffbit, tituloJogador, (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, tituloJogador, 40*escala, 1).x/2.0f, alturaAtual*0.25f}, 40*escala, 1, YELLOW);
-                    DrawTextEx(fonteOffbit, "Digite seu nome (teclado):", (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, "Digite seu nome (teclado):", 30*escala, 1).x/2.0f, alturaAtual*0.4f}, 30*escala, 1, LIGHTGRAY);
-                    Rectangle caixaTexto = {larguraAtual/2.0f - 200*escala, alturaAtual*0.5f, 400*escala, 60*escala};
-                    DrawRectangleRounded(caixaTexto, 0.2f, 10, RAYWHITE);
+                    DrawTextEx(fonteOffbit, "Digite seu nome:", (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, "Digite seu nome:", 30*escala, 1).x/2.0f, alturaAtual*0.4f}, 30*escala, 1, LIGHTGRAY);
+
+                    Rectangle caixaTexto = {larguraAtual/2.0f - 200*escala, alturaAtual/2.0f, 400*escala, 60*escala};
+                    DrawRectangleRounded(caixaTexto, 0.2f, 10, Fade(WHITE, 0.8f));
                     DrawRectangleRoundedLines(caixaTexto, 0.2f, 10, 3, BLACK);
-                    DrawTextEx(fonteOffbit, nomeDigitado, (Vector2){caixaTexto.x + 15*escala, caixaTexto.y + 15*escala}, 30*escala, 1, DARKBLUE);
-                    if (((int)(GetTime() * 2)) % 2 == 0 && numLetras < 20) {
-                        DrawTextEx(fonteOffbit, "_", (Vector2){caixaTexto.x + 15*escala + MeasureTextEx(fonteOffbit, nomeDigitado, 30*escala, 1).x, caixaTexto.y + 15*escala}, 30*escala, 1, DARKBLUE);
-                    }
-                    if (erroNome) {
-                        const char* txtErro = "Este nome ja esta em uso!";
-                        DrawTextEx(fonteOffbit, txtErro, (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, txtErro, 25*escala, 1).x/2.0f, caixaTexto.y + 70*escala}, 25*escala, 1, RED);
-                    }
+                    DrawTextEx(fonteOffbit, nomeDigitado, (Vector2){caixaTexto.x + 20*escala, caixaTexto.y + 15*escala}, 30*escala, 1, DARKBLUE);
+
+                    if (erroNome) DrawTextEx(fonteOffbit, "Nome ja em uso!", (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, "Nome ja em uso!", 20*escala, 1).x/2.0f, alturaAtual*0.58f}, 20*escala, 1, RED);
+
                     Rectangle btnAvancar = {larguraAtual/2.0f - 100*escala, alturaAtual*0.65f, 200*escala, 60*escala};
-                    DesenharBotaoCentralizado(btnAvancar, "Avançar", fonteOffbit, 30*escala);
+                    DesenharBotaoCentralizado(btnAvancar, "Avancar", fonteOffbit, 30*escala);
                     if (CheckCollisionPointRec(mousePoint, btnAvancar) && numLetras > 0) DrawRectangleRoundedLines(btnAvancar, 0.4f, 10, 3, WHITE);
+
+                    // ==========================================
+                    // DESENHAR O EASTER EGG (SE ESTIVER ATIVADO)
+                    if (easterEggAtivo != -1) {
+                        DrawRectangle(0, 0, larguraAtual, alturaAtual, Fade(BLACK, 0.85f));
+
+                        // Descobre qual imagem desenhar baseada na ID
+                        Texture2D imgAtual;
+                        switch(easterEggAtivo) {
+                            case 0: imgAtual = imgResenha; break;
+                            case 1: imgAtual = imgResenha1; break;
+                            case 2: imgAtual = imgResenha2; break;
+                            case 3: imgAtual = imgResenha3; break;
+                            case 4: imgAtual = imgResenha4; break;
+                            case 5: imgAtual = imgResenha5; break;
+                            case 6: imgAtual = imgResenha6; break;
+                            case 7: imgAtual = imgResenha7; break;
+                            case 8: imgAtual = imgResenha8; break;
+                            case 9: imgAtual = imgResenha9; break;
+                            case 10: imgAtual = imgResenha10; break;
+                        }
+
+                        // Desenha a imagem escolhida no centro
+                        float imgX = larguraAtual/2.0f - imgAtual.width/2.0f;
+                        float imgY = alturaAtual/2.0f - imgAtual.height/2.0f;
+                        DrawTexture(imgAtual, imgX, imgY, WHITE);
+
+                        // Letreiro de confirmação
+                        const char* txtEaster = "RESENHA DESBLOQUEADA!";
+                        Vector2 tamTxt = MeasureTextEx(fonteOffbit, txtEaster, 60*escala, 1);
+                        DrawTextEx(fonteOffbit, txtEaster, (Vector2){larguraAtual/2.0f - tamTxt.x/2.0f, imgY - 90*escala}, 60*escala, 1, GOLD);
+                    }
+                    // ==========================================
+
                 } else if (estadoCadastro == 2) {
                     const char* tituloJogador = TextFormat("JOGADOR %d: %s", jogadorAtualCadastro, nomeDigitado);
                     DrawTextEx(fonteOffbit, tituloJogador, (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, tituloJogador, 40*escala, 1).x/2.0f, alturaAtual*0.25f}, 40*escala, 1, YELLOW);
@@ -1704,6 +1837,52 @@ int main(void) {
             case TELA_JOGO:
                 BeginMode2D(camera);
                 DesenharCaminhoAED(tabuleiroFisico, escala, fonteOffbit, nomesPorCor);
+                // ==========================================
+                    // DESENHAR O PEÃO PULANDO COM A NAME TAG
+                    if (estadoJogoAtual == ESTADO_ANIMANDO_PEAO) {
+                        float startX, startY, endX, endY;
+                        int casaAtual = jogadorDaVez.posicao->info.posicao;
+                        int casaDestino = casaAtual + direcaoAnimacao;
+                        if (casaAtual == 30 && direcaoAnimacao > 0) casaDestino = 31; // Pula pro barco visualmente
+
+                        ObterPosicaoIlha(casaAtual, escala, &startX, &startY);
+                        ObterPosicaoIlha(casaDestino, escala, &endX, &endY);
+
+                        float currentX = startX + (endX - startX) * progressoPulo;
+                        float currentY = startY + (endY - startY) * progressoPulo;
+
+                        // Adiciona a parábola (seno de 0 a 1) para subir e descer (Pulo de 150px)
+                        currentY -= sinf(progressoPulo * PI) * (150 * escala);
+
+                        float offX = 0, offY = 0;
+                        if (jogadorDaVez.cor == 1) { offX = -25*escala; offY = -25*escala; }
+                        if (jogadorDaVez.cor == 2) { offX =  25*escala; offY = -25*escala; }
+                        if (jogadorDaVez.cor == 3) { offX = -25*escala; offY =  25*escala; }
+                        if (jogadorDaVez.cor == 4) { offX =  25*escala; offY =  25*escala; }
+
+                        Color corPeao = RED;
+                        if (jogadorDaVez.cor == 2) corPeao = GREEN;
+                        if (jogadorDaVez.cor == 3) corPeao = BLUE;
+                        if (jogadorDaVez.cor == 4) corPeao = YELLOW;
+
+                        // Sombra Projetada
+                        DrawEllipse(currentX + offX, currentY + offY + sinf(progressoPulo * PI) * (150 * escala) + 15*escala, 15*escala, 5*escala, Fade(BLACK, 0.3f));
+
+                        // Peão no ar
+                        DrawCircle(currentX + offX, currentY + offY, 15 * escala, corPeao);
+
+                        // Name Tag Flutuando junto
+                        if (strlen(jogadorDaVez.nome) > 0) {
+                            float tamFonteNick = 54 * escala;
+                            Vector2 tamNick = MeasureTextEx(fonteOffbit, jogadorDaVez.nome, tamFonteNick, 1);
+                            float baseY = (currentY + offY) - 120 * escala;
+                            Rectangle bgNick = { (currentX + offX) - tamNick.x/2.0f - 10*escala, baseY - 5*escala, tamNick.x + 20*escala, tamNick.y + 10*escala };
+
+                            DrawRectangleRec(bgNick, Fade(BLACK, 0.5f));
+                            DrawTextEx(fonteOffbit, jogadorDaVez.nome, (Vector2){(currentX + offX) - tamNick.x/2.0f, baseY}, tamFonteNick, 1, WHITE);
+                        }
+                    }
+                    // ==========================================
                 EndMode2D();
 
                 if (turnoIniciado) {
@@ -1858,6 +2037,17 @@ int main(void) {
 
     CloseAudioSystem();
     UnloadFont(fonteOffbit);
+    UnloadTexture(imgResenha);
+    UnloadTexture(imgResenha1);
+    UnloadTexture(imgResenha2);
+    UnloadTexture(imgResenha3);
+    UnloadTexture(imgResenha4);
+    UnloadTexture(imgResenha5);
+    UnloadTexture(imgResenha6);
+    UnloadTexture(imgResenha7);
+    UnloadTexture(imgResenha8);
+    UnloadTexture(imgResenha9);
+    UnloadTexture(imgResenha10);
     CloseWindow();
     return 0;
 }
