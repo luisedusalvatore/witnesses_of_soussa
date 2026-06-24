@@ -62,7 +62,7 @@ int roda_jogo(){
 
     while (getchar() != '\n' && !feof(stdin));
 
-    //  Loop do jogo
+    //  loop do jogo
     int fim_de_jogo = 0;
     while (!fim_de_jogo) {
         system("cls");
@@ -75,9 +75,7 @@ int roda_jogo(){
         }
     }
 
-    // ==========================================
-    // LIMPEZA DE MEMÓRIA E SALVAMENTO SEGURO
-    // ==========================================
+    //limpeza de memoria
     Player e; // Struct normal alocada na stack (evita o crash!)
 
     // processo de limpar memoria
@@ -97,8 +95,6 @@ int roda_jogo(){
     }
     free(tabuleiro);
 
-    // Obs: A árvore AVL será liberada pelo sistema operacional ao fim do programa,
-    // mas num cenário ideal futuro você pode chamar um liberaABB(&arvore) aqui.
 
     return 0;
 }
