@@ -500,7 +500,7 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
     system("cls"); // limpa a tela para dar a ilusão de animação
     imprime_tabuleiro_visual(tabuleiro);
 
-    // CORRECAO: checar venceu ANTES de acessar posicao->info.posicao
+
     // Quando venceu==1, posicao é NULL (saiu do tabuleiro) e o acesso causava segfault
     if (venceu == 1) {
         printf("\n>>> %s tirou %d no dado e CHEGOU AO FIM DO TABULEIRO! <<<\n", jogador.nome, valor_dado);
@@ -576,7 +576,7 @@ int rodadaplayer(tp_fila *jogadores, tp_listade *tabuleiro ,tp_pilha *perguntas_
             printf("[INVENTARIO CHEIO] Abriu o bau, mas o seu inventario ja tem 3 itens. Nao pode carregar mais!\n");
         }
     }
-    // ==========================================
+
     else {
         printf("\nEsta e uma casa comum. Nada acontece.\n");
     }
