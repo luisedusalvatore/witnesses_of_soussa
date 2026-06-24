@@ -7,6 +7,7 @@
 static Music musica_menu_principal;
 static Music musica_creditos;
 static Music musica_fim_jogo;
+static Music musica_jogo;
 static Music *musica_atual = NULL; // ponteiro para a música ativa no momento
 
 // variáveis estáticas internas para os efeitos sonoros
@@ -23,6 +24,7 @@ static void InitAudioSystem() {
     musica_menu_principal = LoadMusicStream("assets/musica_menu_principal.mp3");
     musica_creditos = LoadMusicStream("assets/musica_creditos.mp3");
     musica_fim_jogo = LoadMusicStream("assets/musica_fim_jogo.mp3");
+    musica_jogo = LoadMusicStream("assets/musica_jogo.mp3");
 
     som_dados_rolando = LoadSound("assets/som_dados_rolando.wav");
     som_salto_player = LoadSound("assets/som_salto_player.wav");
@@ -45,6 +47,9 @@ static void PlayMusicTrack(int trackIndex) {
             break;
         case 2:
             musica_atual = &musica_fim_jogo;
+            break;
+        case 3:
+            musica_atual = &musica_jogo;
     }
 
     // inicia a reprodução da nova musica

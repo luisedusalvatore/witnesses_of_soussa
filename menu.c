@@ -1576,7 +1576,8 @@ int main(void) {
                 if (tela != telaAnterior) {
 
                     if ((tela == TELA_MENU && telaAnterior == TELA_CREDITOS) ||
-                        (tela == TELA_MENU && telaAnterior == TELA_FIM_JOGO)) {
+                        (tela == TELA_MENU && telaAnterior == TELA_FIM_JOGO) ||
+                        (tela == TELA_MENU && telaAnterior == TELA_JOGO)) {
                         PlayMusicTrack(0);
                     }
                     else if (tela == TELA_CREDITOS) {
@@ -1584,6 +1585,9 @@ int main(void) {
                     }
                     else if (tela == TELA_FIM_JOGO) {
                         PlayMusicTrack(2);
+                    }
+                    else if (tela == TELA_JOGO){
+                        PlayMusicTrack(3);
                     }
                     telaAnterior = tela;
                 }
