@@ -5,8 +5,8 @@
 #include <string.h>
 #include "tipos.h"
 
-// Cria o arquivo CSV com o cabecalho apenas se ele ainda nao existir.
-// Usar fopen com "r" primeiro evita apagar o historico de partidas anteriores.
+// cria o arquivo csv com o cabecalho apenas se ele ainda nao existir.
+// usar fopen com "r" primeiro evita apagar o historico de partidas anteriores.
 void inicializa_historico() {
     FILE *f = fopen("historico_respostas.csv", "r");
     if (f != NULL) {
@@ -25,7 +25,7 @@ void inicializa_historico() {
     fclose(f);
 }
 
-// Salva UMA linha no CSV para cada resposta dada durante o jogo.
+// salva uma linha no csv para cada resposta dada durante o jogo.
 // Chamada pelo jogadores.h logo apos o jogador responder.
 void salvarHistoricoResposta(char *nome_jogador, tp_pergunta p,
                               char resposta_jogador, char *resultado) {
