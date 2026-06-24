@@ -9,14 +9,14 @@
 
 struct tp_no_arvore {
    struct tp_no_arvore *esq;
-   tp_estatistica_casa info; // <-- AGORA GUARDA OS DADOS DA CASA!
+   tp_estatistica_casa info;
    int alt;
    struct tp_no_arvore *dir;
 };
 
 typedef struct tp_no_arvore* ArvAVL;
 
-// PROTÓTIPOS
+// prototipos
 ArvAVL* criarAVL();
 void preOrd(ArvAVL* raiz);
 void emOrd(ArvAVL* raiz);
@@ -32,7 +32,7 @@ void RotacaoLR(ArvAVL* raiz);
 int inserir(ArvAVL* raiz, tp_estatistica_casa novo_dado);
 void registra_passagem(ArvAVL* raiz, int num_casa, int acertou, int errou);
 
-static int contPrint=0; // 3. STATIC ADICIONADO AQUI
+static int contPrint=0;
 
 ArvAVL* criarAVL(){
     ArvAVL *raiz = (ArvAVL*)malloc(sizeof(ArvAVL));
@@ -107,7 +107,6 @@ int totalNOsABB(ArvAVL* raiz){
 	return (tot_esq + tot_dir + 1);
 }
 
-// Atualize também o protótipo lá em cima para: int inserir(ArvAVL* raiz, tp_hank novo_dado);
 
 int inserir(ArvAVL* raiz, tp_estatistica_casa novo_dado){
 	int res;
@@ -122,7 +121,6 @@ int inserir(ArvAVL* raiz, tp_estatistica_casa novo_dado){
 		return 1;
 	} else {
 		struct tp_no_arvore* atual = *raiz;
-        // COMPARA PELO NÚMERO DA CASA (CHAVE)
 		if(novo_dado.numero_casa < atual->info.numero_casa){
 			if((res=inserir(&(atual->esq), novo_dado))==1){
 				if(fb_NO(atual) >= 2){
@@ -138,14 +136,14 @@ int inserir(ArvAVL* raiz, tp_estatistica_casa novo_dado){
 				}
 			}
 		} else {
-            return 0; // Casa já existe, não insere duplicado!
+            return 0;
         }
 		atual->alt = maior(alt_NO(atual->esq), alt_NO(atual->dir)) + 1;
 		return res;
 	}
 }
 
-// Função que o professor exigiu: Busca a casa em tempo logarítmico e atualiza os status
+// função para buscar a casa que caiu e atualizar os status
 void registra_passagem(ArvAVL* raiz, int num_casa, int acertou, int errou) {
     if(raiz == NULL || *raiz == NULL) return;
 
@@ -214,7 +212,6 @@ int maior(int x, int y){
 void RotacaoLL(ArvAVL* raiz){
 	struct tp_no_arvore *no;
 	no = (*raiz)->esq;
-    // 4. LINHA CRÍTICA ADICIONADA: Passa o filho da direita de 'no' para a esquerda da 'raiz'
     (*raiz)->esq = no->dir;
 	no->dir = *raiz;
 	(*raiz)->alt = maior(alt_NO((*raiz)->esq), alt_NO((*raiz)->dir)) +1;
