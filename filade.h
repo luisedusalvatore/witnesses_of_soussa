@@ -45,7 +45,7 @@ int insere_fila (tp_fila *fila, tp_item_fila e){
     return 1;
 }
 
-int remove_fila (tp_fila *fila, tp_item_fila *e){ // Vai ter que mexer nisso aqui depois
+int remove_fila (tp_fila *fila, tp_item_fila *e){
     if (fila_vazia(fila)) return 0;
 
     tp_no_fila *aux = fila->ini;
@@ -61,7 +61,6 @@ int remove_fila (tp_fila *fila, tp_item_fila *e){ // Vai ter que mexer nisso aqu
     return 1;
 }
 
-// CORREÇÃO CRÍTICA: Resolvido o Use-After-Free
 tp_fila *destroi_fila(tp_fila *fila) {
     tp_item_fila e;
     while (!fila_vazia(fila)) {
