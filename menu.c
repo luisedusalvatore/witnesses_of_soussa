@@ -4,6 +4,7 @@
 #include "soundsfx.h"
 #include <time.h>
 // baixem a versão 4.2 do raylib pfv
+
 // --------------------------------------------------------------------------
 // DEFINIÇÕES E ESTRUTURAS
 // --------------------------------------------------------------------------
@@ -16,9 +17,9 @@ typedef enum {
     TELA_FIM_JOGO,
     TELA_RANKING
 } TelaAtual;
-
 // ==========================================
-// MÁQUINA DE ESTADOS DO JOGO (Substitui os scanfs)
+
+// MÁQUINA DE ESTADOS DO JOGO (substitui os scanfs pq crasha o jogo)
 typedef enum {
     ESTADO_ESPERANDO_DADO,
     ESTADO_ANIMANDO_DADO,
@@ -47,11 +48,11 @@ typedef struct {
 } Estrela;
 
 typedef struct {
-    Vector2 pos;       // Posição na tela
-    Vector2 vel;       // Velocidade de arremesso
-    float tamanho;     // Tamanho do dado
-    bool segurando;    // Verifica se o mouse está clicando nele
-    int valor;         // O número atual da face (1 a 6)
+    Vector2 pos;
+    Vector2 vel;
+    float tamanho;
+    bool segurando;
+    int valor;
 } DadoInterativo;
 
 #define NUM_CORREDORES 4
@@ -91,12 +92,12 @@ void ResetarCorredores(Corredor corredores[], float chaoY, float escala) {
 // Função para desenhar o enunciado com quebra de linha automática (Word Wrap) e cores
 void DesenharPerguntaFormatada(Font fonte, const char* texto, Vector2 pos, float tamanhoFonte, float escala) {
     float yAtual = pos.y;
-    float larguraMaxima = 700.0f * escala; // Limite da caixa branca antes de vazar
+    float larguraMaxima = 700.0f * escala; // limite da caixa branca antes de vazar
     const char *ptr = texto;
     const char *proxLinha;
 
     while (*ptr != '\0') {
-        // Encontra a próxima quebra de linha forçada (os \n que usamos para separar alternativas)
+        // encontra a próxima quebra de linha forçada (os \n que usamos para separar alternativas)
         proxLinha = strchr(ptr, '\n');
         int len = (proxLinha != NULL) ? (proxLinha - ptr) : strlen(ptr);
 
@@ -159,6 +160,7 @@ void DesenharPerguntaFormatada(Font fonte, const char* texto, Vector2 pos, float
                 DrawTextEx(fonte, linhaExibicao, (Vector2){xAtual, yAtual}, tamanhoAtual, 1, corTexto);
                 yAtual += tamanhoAtual * 1.1f;
             }
+
             // ==========================================
 
         } else {
@@ -202,18 +204,17 @@ void DesenharDadoFace(float x, float y, float size, int valor, float escala) {
 void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char nomesPorCor[4][30]) {
     if (tabuleiro == NULL || tabuleiro->ini == NULL) return;
 
-    // Medidas do novo mundo horizontal
     float size = 120 * escala;           // Tamanho da ilha
     float gapX = 400 * escala;           // Distância horizontal entre as casas
     float larguraBioma = 10 * gapX;      // Cada bioma engloba exatas 10 casas
     float centroY = 0.0f;                // O eixo Y central do mundo
 
-    // 1. DESENHAR O FUNDO DOS 3 BIOMAS (Faixas Infinitas com Degradê Horizontal)
+    // Desenha o fundo dos biomas
     Color corOceano = (Color){ 70, 130, 180, 255 };
     Color corPantano = (Color){ 46, 139, 87, 255 };
     Color corVulcao = (Color){ 139, 0, 0, 255 };
 
-    float fade = 800 * escala; // Largura do "borrão" da transição
+    float fade = 800 * escala;
     float transicao1 = larguraBioma;
     float transicao2 = larguraBioma * 2.0f;
 
@@ -226,7 +227,6 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
     float tempo = GetTime();
     Color corOnda = (Color){ 135, 206, 250, 80 }; // Azul claro quase transparente (Light Sky Blue)
 
-    // Definimos uma grade virtual de ondas que cobre a área visível do oceano
     int espacamentoX = 300 * escala;
     int espacamentoY = 150 * escala;
 
@@ -235,15 +235,15 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
         float offsetLinha = (abs(y / espacamentoY) % 2 == 0) ? 0 : (150 * escala);
 
         for (int x = -3000; x < transicao1; x += espacamentoX) {
-            // 1. Movimento contínuo para a esquerda:
-            // A velocidade varia levemente baseada no 'y' para criar um efeito Parallax (profundidade)
+            // Movimento contínuo para a esquerda:
+            // A velocidade varia levemente baseada no 'y' para criar um efeito Parallax
             float velocidade = 50.0f * escala + (abs(y) % 30);
             float deslocamentoX = fmod(tempo * velocidade, espacamentoX);
             float posX = x + offsetLinha - deslocamentoX;
 
             // Só desenha se a onda não tiver invadido a transição do Pântano
             if (posX < transicao1 - (fade / 2.0f)) {
-                // 2. Movimento de flutuação (subir e descer):
+                // Movimento de flutuação (subir e descer):
                 float posY = y + sinf(tempo * 2.0f + posX * 0.01f) * (10.0f * escala);
 
                 // Desenha a crista da onda (duas linhas charmosas)
@@ -269,7 +269,7 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
     DrawRectangle(transicao2 + (fade/2.0f), -10000, 20000, 20000, corVulcao);
 
     // ========================================================
-    // EFEITO VISUAL: JACARÉS À ESPREITA NO PÂNTANO
+    // EFEITO VISUAL: Jacaré no rio ( ou era pra ser)
     // ========================================================
     Color corJacare = (Color){ 10, 30, 15, 120 }; // Verde bem escuro e transparente (silhueta na água turva)
     Color corOlho = (Color){ 200, 200, 0, 80 };   // Brilho amarelo bem fraco para os olhos
@@ -284,7 +284,7 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
         // O loop começa na transicao1 (início do pântano) e vai até um pouco depois da transicao2
         for (int x = transicao1; x < transicao2 + 1000; x += espacamentoXJacare) {
 
-            // Velocidade lenta e sorrateira (nadando para a esquerda)
+            // Velocidade lenta e sorrateira
             float velocidade = 20.0f * escala + (abs(y) % 15);
             float deslocamentoX = fmod(tempo * velocidade, espacamentoXJacare);
             float posX = x + offsetLinha - deslocamentoX;
@@ -295,21 +295,21 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
                 // Flutuação geral do corpo
                 float posY = y + sinf(tempo * 1.5f + posX * 0.02f) * (4.0f * escala);
 
-                // 1. Focinho longo (apontando para a esquerda)
+                //  Focinho longo
                 DrawEllipse(posX - 25 * escala, posY + 4 * escala, 18 * escala, 5 * escala, corJacare);
 
-                // 2. Cabeça e Olhos (protuberância acima da água)
+                //  Cabeça e Olhos
                 DrawCircle(posX - 5 * escala, posY, 6 * escala, corJacare);
                 DrawCircle(posX - 7 * escala, posY - 1 * escala, 2 * escala, corOlho); // Olho sinistro
 
-                // 3. Corpo longo e submerso
+                //  Corpo longo e submerso
                 DrawEllipse(posX + 20 * escala, posY + 4 * escala, 25 * escala, 7 * escala, corJacare);
 
-                // 4. Escamas das costas (pequenas lombadas)
+                // Escamas das costas (pequenas lombadas)
                 DrawCircle(posX + 10 * escala, posY - 1 * escala, 4 * escala, corJacare);
                 DrawCircle(posX + 25 * escala, posY, 4 * escala, corJacare);
 
-                // 5. Rabo sinuoso (move-se independente do corpo para simular nado)
+                //  Rabo sinuoso (move-se independente do corpo para simular nado)
                 float balancoRabo = sinf(tempo * 5.0f + posX * 0.1f) * (6.0f * escala);
                 DrawEllipse(posX + 55 * escala, posY + 5 * escala + balancoRabo, 15 * escala, 3 * escala, corJacare);
             }
@@ -328,7 +328,7 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
     int espacamentoXB = 250 * escala;
     int espacamentoYB = 300 * escala;
 
-    // CORREÇÃO DA PAREDE: Aumentado de 5000 para 10000 * escala (Cobre bem além da casa 30)
+    // CORREÇÃO DA PAREDE: Aumentado de 5000 para 10000 * escala
     for (int x = transicao2; x < transicao2 + (10000 * escala); x += espacamentoXB) {
         for (int y = 2000; y >= -2000; y -= espacamentoYB) {
 
@@ -336,7 +336,6 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
             float defasagem = fmod(semente, 100.0f);
             float pseudoRandX = fmod(semente, 120.0f) * escala;
 
-            // Lava é densa, então a velocidade agora é mais lenta e pesada
             float velocidadeSubida = 15.0f * escala + fmod(semente, 10.0f);
 
             float tempoVida = fmod((tempo + defasagem) * velocidadeSubida, espacamentoYB);
@@ -349,14 +348,14 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
                 float progresso = tempoVida / espacamentoYB;
 
                 if (progresso < 0.8f) {
-                    // FASE 1: Bolhas MUITO MAIORES para criar volume no cenário
+
                     float raioBase = (15.0f * escala) + (progresso * 40.0f * escala);
                     DrawCircle(posX, posY, raioBase, corBolha);
 
-                    // O centro alaranjado vai crescendo e engolindo a bolha (prestes a estourar)
+
                     DrawCircle(posX - 2*escala, posY - 2*escala, raioBase * (0.2f + progresso*0.6f), corBrilho);
                 } else {
-                    // FASE 2: O Estouro (POP)
+
                     float progressoExplosao = (progresso - 0.8f) / 0.2f;
                     float raioExplosao = 50.0f * escala + (progressoExplosao * 30.0f * escala);
 
@@ -364,12 +363,12 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
                     Color corFade = corBrilho;
                     corFade.a = alpha;
 
-                    // Desenhando 3 linhas simultâneas para simular um anel de impacto GROSSO
+
                     DrawCircleLines(posX, posY, raioExplosao, corFade);
                     DrawCircleLines(posX, posY, raioExplosao - 1.5f*escala, corFade);
                     DrawCircleLines(posX, posY, raioExplosao - 3.0f*escala, corFade);
 
-                    // Gotas de lava gigantes voando para fora do impacto
+
                     float dist = 20.0f * escala + (progressoExplosao * 40.0f * escala);
                     DrawCircle(posX - dist, posY - dist, 8*escala, corFade);
                     DrawCircle(posX + dist, posY - dist*0.4f, 6*escala, corFade);
@@ -380,7 +379,7 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
     }
     // ========================================================
 
-    // 2. DESENHAR AS ILHAS
+    // DESENHAR AS ILHAS
     while (atual != NULL) {
         int pos = atual->info.posicao - 1; // Índice 0 a 29
         int bioma = pos / 10;              // 0 (Oceano), 1 (Pântano), 2 (Vulcão)
@@ -425,7 +424,7 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
         const char* numCasa = TextFormat("%d", atual->info.posicao);
         DrawTextEx(fonte, numCasa, (Vector2){px - 15*escala, py + size*1.1f}, 40*escala, 1, WHITE);
 
-        // 3. DESENHAR PEÕES E NICKNAMES (Estilo Minecraft)
+        //  DESENHAR PEÕES E NICKNAMES (Estilo Minecraft)
         float r = 15 * escala;
         Vector2 posPeoes[4] = {
             {px - 25*escala, py - 25*escala}, // P1 (Vermelho)
@@ -441,11 +440,11 @@ void DesenharCaminhoAED(tp_listade *tabuleiro, float escala, Font fonte, char no
             // Se o jogador desta cor estiver na casa...
             if (atual->info.cor[i] == 1) {
 
-                // 3.1 Desenha a bolinha (Peão) do jogador
+                //  Desenha a bolinha (Peão) do jogador
                 DrawCircle(posPeoes[i].x, posPeoes[i].y, r, corPeoes[i]);
 
-                // 3.2 Desenha a Name Tag (Se ele tiver um nome cadastrado)
-                // 3.2 Desenha a Name Tag (Se ele tiver um nome cadastrado)
+                // Desenha a Name Tag (Se ele tiver um nome cadastrado)
+                // Desenha a Name Tag (Se ele tiver um nome cadastrado)
                 if (strlen(nomesPorCor[i]) > 0) {
                     // Tamanho da fonte triplicado (de 18 para 54)
                     float tamFonteNick = 54 * escala;
@@ -677,7 +676,7 @@ int main(void) {
     char mensagemSistema[200] = "O jogo vai comecar!";
     int subTelaFim = 0; // 0 = Tela de Vitória, 1 = Ranking Geral, 2 = Estatísticas da AVL
 
-    // INICIALIZAÇÃO DA ÁRVORE AVL (NOVO)
+    // INICIALIZAÇÃO DA ÁRVORE AVL
     ArvAVL* arvore = criarAVL();
     for (int i = 1; i <= 30; i++) {
         tp_estatistica_casa nova_casa = {i, 0, 0, 0};
@@ -861,7 +860,7 @@ int main(void) {
                         // 3. Reseta a Máquina de Estados para um novo jogo limpo
                         turnoIniciado = false;
                         estadoJogoAtual = ESTADO_ESPERANDO_DADO;
-                        strcpy(mensagemSistema, "O jogo vai comecar!");
+                        strcpy(mensagemSistema, "O jogo vai começar!");
                         // ========================================================
                     }
                     else if (CheckCollisionPointRec(mousePoint, btnRanking)) tela = TELA_RANKING;
@@ -972,8 +971,8 @@ int main(void) {
                                 if (strcmp(nomeDigitado, "andre") == 0){
                                     easterEggAtivo = 0;
                                     PlaySoundEffect(3);
-                                    
-                                } 
+
+                                }
                                 else if (strcmp(nomeDigitado, "carlos") == 0) easterEggAtivo = 1;
                                 else if (strcmp(nomeDigitado, "formigao") == 0) easterEggAtivo = 2;
                                 else if (strcmp(nomeDigitado, "gerek") == 0) easterEggAtivo = 3;
@@ -982,7 +981,7 @@ int main(void) {
                                 else if (strcmp(nomeDigitado, "sanval") == 0){
                                     easterEggAtivo = 6;
                                     PlaySoundEffect(2);
-                                } 
+                                }
                                 else if (strcmp(nomeDigitado, "seugosti") == 0) easterEggAtivo = 7;
                                 else if (strcmp(nomeDigitado, "soussa") == 0) easterEggAtivo = 8;
                                 else if (strcmp(nomeDigitado, "marcel") == 0) easterEggAtivo = 9;
@@ -1575,21 +1574,21 @@ int main(void) {
         // ==========================================
         static TelaAtual telaAnterior = (TelaAtual)-1;
                 if (tela != telaAnterior) {
-                
-                    if ((tela == TELA_MENU && telaAnterior == TELA_CREDITOS) || 
+
+                    if ((tela == TELA_MENU && telaAnterior == TELA_CREDITOS) ||
                         (tela == TELA_MENU && telaAnterior == TELA_FIM_JOGO)) {
                         PlayMusicTrack(0);
-                    } 
+                    }
                     else if (tela == TELA_CREDITOS) {
                         PlayMusicTrack(1);
-                    } 
+                    }
                     else if (tela == TELA_FIM_JOGO) {
                         PlayMusicTrack(2);
                     }
-                    telaAnterior = tela; 
+                    telaAnterior = tela;
                 }
-                
-                
+
+
                 UpdateAudioSystem();
 
         // ==========================================
@@ -1668,7 +1667,7 @@ int main(void) {
             case TELA_CADASTRO:
                 DrawTextEx(fonteOffbit, "CADASTRO DE JOGADORES", (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, "CADASTRO DE JOGADORES", 40*escala, 1).x/2.0f, alturaAtual*0.1f}, 40*escala, 1, WHITE);
                 if (estadoCadastro == 0) {
-                    DrawTextEx(fonteOffbit, "Quantos jogadores irao participar?", (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, "Quantos jogadores irao participar?", 30*escala, 1).x/2.0f, alturaAtual*0.3f}, 30*escala, 1, LIGHTGRAY);
+                    DrawTextEx(fonteOffbit, "Quantos jogadores irão participar?", (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, "Quantos jogadores irao participar?", 30*escala, 1).x/2.0f, alturaAtual*0.3f}, 30*escala, 1, LIGHTGRAY);
                     Rectangle btn2 = {larguraAtual/2.0f - 150*escala, alturaAtual/2.0f, 80*escala, 80*escala};
                     Rectangle btn3 = {larguraAtual/2.0f - 40*escala, alturaAtual/2.0f, 80*escala, 80*escala};
                     Rectangle btn4 = {larguraAtual/2.0f + 70*escala, alturaAtual/2.0f, 80*escala, 80*escala};
@@ -1688,10 +1687,10 @@ int main(void) {
                     DrawRectangleRoundedLines(caixaTexto, 0.2f, 10, 3, BLACK);
                     DrawTextEx(fonteOffbit, nomeDigitado, (Vector2){caixaTexto.x + 20*escala, caixaTexto.y + 15*escala}, 30*escala, 1, DARKBLUE);
 
-                    if (erroNome) DrawTextEx(fonteOffbit, "Nome ja em uso!", (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, "Nome ja em uso!", 20*escala, 1).x/2.0f, alturaAtual*0.58f}, 20*escala, 1, RED);
+                    if (erroNome) DrawTextEx(fonteOffbit, "Nome já em uso!", (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, "Nome ja em uso!", 20*escala, 1).x/2.0f, alturaAtual*0.58f}, 20*escala, 1, RED);
 
                     Rectangle btnAvancar = {larguraAtual/2.0f - 100*escala, alturaAtual*0.65f, 200*escala, 60*escala};
-                    DesenharBotaoCentralizado(btnAvancar, "Avancar", fonteOffbit, 30*escala);
+                    DesenharBotaoCentralizado(btnAvancar, "Avançar", fonteOffbit, 30*escala);
                     if (CheckCollisionPointRec(mousePoint, btnAvancar) && numLetras > 0) DrawRectangleRoundedLines(btnAvancar, 0.4f, 10, 3, WHITE);
 
                     // ==========================================
@@ -1779,7 +1778,7 @@ int main(void) {
                 // Desenha o botão de limpar histórico
                 {
                     Rectangle btnLimpar = { larguraAtual / 2.0f - 150.0f * escala, alturaAtual * 0.85f, 300.0f * escala, 60.0f * escala };
-                    DesenharBotaoCentralizado(btnLimpar, "Limpar Historico", fonteOffbit, 30 * escala);
+                    DesenharBotaoCentralizado(btnLimpar, "Limpar Hístorico", fonteOffbit, 30 * escala);
                     if (CheckCollisionPointRec(mousePoint, btnLimpar)) DrawRectangleRoundedLines(btnLimpar, 0.4f, 10, 3, RED);
                 }
                 break;
@@ -1787,9 +1786,9 @@ int main(void) {
             case TELA_INFORMACOES:
                 DrawTextEx(fonteOffbit, "COMO JOGAR", (Vector2){ (larguraAtual - MeasureTextEx(fonteOffbit, "COMO JOGAR", 40 * escala, 1).x) / 2.0f, alturaAtual * 0.08f }, 40 * escala, 1, BLACK);
                 float textoX = larguraAtual * 0.25f;
-                DrawTextEx(fonteOffbit, "- Jogue o dado para avancar casas.", (Vector2){textoX, alturaAtual * 0.20f}, tamFonteTexto, 1, DARKGRAY);
-                DrawTextEx(fonteOffbit, "- Casas 'B' dao bonus ao jogador.", (Vector2){textoX, alturaAtual * 0.27f}, tamFonteTexto, 1, DARKGRAY);
-                DrawTextEx(fonteOffbit, "- Casas '?' farao perguntas.", (Vector2){textoX, alturaAtual * 0.34f}, tamFonteTexto, 1, DARKGRAY);
+                DrawTextEx(fonteOffbit, "- Jogue o dado para avançar casas.", (Vector2){textoX, alturaAtual * 0.20f}, tamFonteTexto, 1, DARKGRAY);
+                DrawTextEx(fonteOffbit, "- Casas 'B' dão bônus ao jogador.", (Vector2){textoX, alturaAtual * 0.27f}, tamFonteTexto, 1, DARKGRAY);
+                DrawTextEx(fonteOffbit, "- Casas '?' farão perguntas.", (Vector2){textoX, alturaAtual * 0.34f}, tamFonteTexto, 1, DARKGRAY);
                 DrawTextEx(fonteOffbit, "- Chegue ao fim do caminho para vencer!", (Vector2){textoX, alturaAtual * 0.41f}, tamFonteTexto, 1, DARKGRAY);
 
                 DrawRectangleRounded((Rectangle){mesaX, mesaY, mesaW, mesaH}, 0.1f, 10, DARKBROWN);
@@ -1821,8 +1820,8 @@ int main(void) {
 
                 // Renderização condicional baseada na aba selecionada
                 if (subTelaFim == 0) {
-                    const char* txtFim = "PARABENS! PARTIDA CONCLUIDA!";
-                    const char* txtVencedor = TextFormat("O JOGADOR %s CONQUISTOU A APROVACAO!", jogadorDaVez.nome);
+                    const char* txtFim = "PARABÉNS! PARTIDA CONCLUÍDA!";
+                    const char* txtVencedor = TextFormat("O JOGADOR %s CONQUISTOU A APROVAÇÃO!", jogadorDaVez.nome);
 
                     DrawTextEx(fonteOffbit, txtFim, (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, txtFim, 50*escala, 1).x/2.0f, alturaAtual*0.35f}, 50*escala, 1, GREEN);
                     DrawTextEx(fonteOffbit, txtVencedor, (Vector2){larguraAtual/2.0f - MeasureTextEx(fonteOffbit, txtVencedor, 35*escala, 1).x/2.0f, alturaAtual*0.48f}, 35*escala, 1, WHITE);
@@ -1851,7 +1850,7 @@ int main(void) {
                     if (subTelaFim == 1) DrawRectangleRoundedLines(rRanking, 0.4f, 10, 3, GOLD);
                     else if (CheckCollisionPointRec(mousePoint, rRanking)) DrawRectangleRoundedLines(rRanking, 0.4f, 10, 3, WHITE);
 
-                    DesenharBotaoCentralizado(rReport, "Ver Relatorio AVL", fonteOffbit, 25*escala);
+                    DesenharBotaoCentralizado(rReport, "Ver Relatório AVL", fonteOffbit, 25*escala);
                     if (subTelaFim == 2) DrawRectangleRoundedLines(rReport, 0.4f, 10, 3, SKYBLUE);
                     else if (CheckCollisionPointRec(mousePoint, rReport)) DrawRectangleRoundedLines(rReport, 0.4f, 10, 3, WHITE);
                 }
@@ -1922,7 +1921,7 @@ int main(void) {
 
                     DrawTextEx(fonteOffbit, txtVez, (Vector2){painelHUD.x + 20*escala, painelHUD.y + 15*escala}, 30*escala, 1, corTxt);
                     DrawTextEx(fonteOffbit, TextFormat("Score: %d", jogadorDaVez.dados.score), (Vector2){painelHUD.x + 20*escala, painelHUD.y + 55*escala}, 25*escala, 1, LIGHTGRAY);
-                    DrawTextEx(fonteOffbit, "INVENTARIO:", (Vector2){painelHUD.x + 20*escala, painelHUD.y + 90*escala}, 20*escala, 1, GRAY);
+                    DrawTextEx(fonteOffbit, "INVENTÁRIO:", (Vector2){painelHUD.x + 20*escala, painelHUD.y + 90*escala}, 20*escala, 1, GRAY);
 
                     for (int i=0; i<3; i++) {
                         Rectangle slot = {painelHUD.x + 20*escala + i*(50*escala), painelHUD.y + 115*escala, 40*escala, 40*escala};
@@ -1976,7 +1975,7 @@ int main(void) {
                     if (subEstadoPergunta == 0) {
                         const char* tituloUni = TextFormat("PERGUNTA - UNIDADE %d", casasModificadas);
                         DrawTextEx(fonteOffbit, tituloUni, (Vector2){modal.x + 20*escala, modal.y + 20*escala}, 40*escala, 1, DARKBLUE);
-                        DrawTextEx(fonteOffbit, "(Use os numeros 1, 2, 3, 4 ou as letras V e F no teclado)", (Vector2){modal.x + 20*escala, modal.y + 60*escala}, 20*escala, 1, GRAY);
+                        DrawTextEx(fonteOffbit, "(Use os números 1, 2, 3, 4 ou as letras V e F no teclado)", (Vector2){modal.x + 20*escala, modal.y + 60*escala}, 20*escala, 1, GRAY);
 
                         // Usa a nossa nova função inteligente para desenhar o texto
                         DesenharPerguntaFormatada(fonteOffbit, perguntaAtual.enunciado, (Vector2){modal.x + 40*escala, modal.y + 120*escala}, 30*escala, escala);
@@ -1984,7 +1983,7 @@ int main(void) {
                     } else if (subEstadoPergunta == 1) {
                         const char *tituloRes = acertouPergunta ? "RESPOSTA CORRETA!" : "RESPOSTA ERRADA!";
                         Color corRes = acertouPergunta ? GREEN : RED;
-                        const char *txtAcao = acertouPergunta ? TextFormat("Voce avanca %d casa(s)!", casasModificadas) : TextFormat("A penalidade te volta %d casa(s)!", casasModificadas);
+                        const char *txtAcao = acertouPergunta ? TextFormat("Você avança %d casa(s)!", casasModificadas) : TextFormat("Você volta %d casa(s)!", casasModificadas);
                         Rectangle btnCont = {modal.x + modal.width/2 - 100*escala, modal.y + modal.height - 100*escala, 200*escala, 60*escala};
 
                         DrawTextEx(fonteOffbit, tituloRes, (Vector2){modal.x + modal.width/2 - MeasureTextEx(fonteOffbit, tituloRes, 50*escala, 1).x/2, modal.y + 80*escala}, 50*escala, 1, corRes);
@@ -2006,7 +2005,7 @@ int main(void) {
                     DrawRectangleRounded(modal, 0.05f, 10, RAYWHITE);
                     DrawRectangleRoundedLines(modal, 0.05f, 10, 5, GOLD);
 
-                    DrawTextEx(fonteOffbit, "VOCE ENCONTROU UM BAU!", (Vector2){modal.x + modal.width/2 - MeasureTextEx(fonteOffbit, "VOCE ENCONTROU UM BAU!", 40*escala, 1).x/2, modal.y + 30*escala}, 40*escala, 1, ORANGE);
+                    DrawTextEx(fonteOffbit, "VOCÊ ENCONTROU UM BAÚ!", (Vector2){modal.x + modal.width/2 - MeasureTextEx(fonteOffbit, "VOCE ENCONTROU UM BAÚ!", 40*escala, 1).x/2, modal.y + 30*escala}, 40*escala, 1, ORANGE);
 
                     switch(itemSorteado) {
                         case 1: nomeItem = "Rerol (Raro)"; break;
@@ -2014,7 +2013,7 @@ int main(void) {
                         case 3: nomeItem = "Tudo ou nada (Mitico)"; break;
                         case 4: nomeItem = "NOSSO item (Mitico)"; break;
                         case 5: nomeItem = "Buraco de Minhoca (Lendario)"; break;
-                        case 6: nomeItem = "Imunidade a resenha (Mitico)"; break;
+                        case 6: nomeItem = "Imunidade à resenha (Mitico)"; break;
                         case 7: nomeItem = "Castigo (Raro)"; break;
                         default: nomeItem = "Vazio"; break;
                     }
