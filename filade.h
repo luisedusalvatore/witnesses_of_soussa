@@ -1,50 +1,93 @@
-#ifndef hank_h
-#define hank_h
-
+#ifndef FILADE_H_INCLUDED
+#define FILADE_H_INCLUDED
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "arvavlr.h"
 #include "tipos.h"
 
-// inicializar o jogador
-int inicializa_hank(Player *jogador){
-    jogador->dados.acertos = 0;
-    jogador->dados.erros = 0;
-    jogador->dados.score = 0;
+typedef Player tp_item_fila;
 
-    // copia o nome do jogador para a estrutura de dados que sera salva no txt
-    strcpy(jogador->dados.nome, jogador->nome);
+typedef struct tp_no_fila_aux {
+  tp_item_fila info;
+  struct tp_no_fila_aux *prox;
+} tp_no_fila;
 
+typedef struct {
+  tp_no_fila *ini, *fim;
+} tp_fila;
+
+tp_fila *inicializa_fila (){
+   tp_fila *fila = (tp_fila*) malloc(sizeof(tp_fila));
+   fila->ini = fila->fim = NULL;
+   return fila;
+}
+
+tp_no_fila *aloca_fila() {
+	return (tp_no_fila*) malloc(sizeof(tp_no_fila));
+}
+
+int fila_vazia (tp_fila *fila){
+    return (fila->ini == NULL);
+}
+
+int insere_fila (tp_fila *fila, tp_item_fila e){
+    tp_no_fila *novo = aloca_fila();
+    if(!novo) return 0;
+
+    novo->info = e;
+    novo->prox = NULL;
+
+    if(fila_vazia(fila)){
+        fila->ini = novo;
+    } else {
+        fila->fim->prox = novo;
+    }
+    fila->fim = novo;
     return 1;
 }
 
-// função recursiva para percorrer a árvore AVL e imprimir no arquivo
-void grava_no_arquivo(ArvAVL* raiz, FILE *arquivo){
-    if(raiz == NULL || *raiz == NULL) return;
+int remove_fila (tp_fila *fila, tp_item_fila *e){
+    if (fila_vazia(fila)) return 0;
 
-    grava_no_arquivo(&((*raiz)->esq), arquivo);
+    tp_no_fila *aux = fila->ini;
+    *e = aux->info;
 
-    fprintf(arquivo, "Casa: %02d | Visitas: %02d | Acertos: %02d | Erros: %02d\n",
-            (*raiz)->info.numero_casa, (*raiz)->info.vezes_caiu,
-            (*raiz)->info.acertos, (*raiz)->info.erros);
+    fila->ini = aux->prox;
 
-    grava_no_arquivo(&((*raiz)->dir), arquivo);
-}
-
-// gera o arquivo de relatório final
-void salva_relatorio_casas(ArvAVL* arvore){
-
-    FILE *arquivo = fopen("relatorio_casas.txt", "w");
-
-    if(arquivo != NULL) {
-        fprintf(arquivo, "--- RELATORIO DE ESTATISTICAS DO TABULEIRO ---\n");
-        fprintf(arquivo, "(Gerado atraves de percurso In-Ordem na Arvore AVL)\n\n");
-
-        grava_no_arquivo(arvore, arquivo); // manda a árvore se imprimir no arquivo
-
-        fclose(arquivo);
+    if (fila->ini == NULL) {
+        fila->fim = NULL;
     }
+
+    free(aux);
+    return 1;
 }
 
-#endif
+tp_fila *destroi_fila(tp_fila *fila) {
+    tp_item_fila e;
+    while (!fila_vazia(fila)) {
+        remove_fila(fila, &e);
+    }
+    free(fila);
+    return NULL;
+}
+
+void imprime_fila(tp_fila *fila) {
+     tp_fila *fila_aux = inicializa_fila();
+     tp_item_fila e;
+
+     printf("Inicio -> [ ");
+	 while (!fila_vazia(fila)) {
+        remove_fila(fila, &e);
+        printf("%s | ", e.nome);
+        insere_fila(fila_aux, e);
+     }
+     printf("] <- Fim\n");
+
+     fila->ini = fila_aux->ini;
+     fila->fim = fila_aux->fim;
+
+     fila_aux->ini = NULL;
+     fila_aux->fim = NULL;
+     free(fila_aux);
+}
+
+#endif // FILADE_H_INCLUDED
