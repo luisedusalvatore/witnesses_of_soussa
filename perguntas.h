@@ -119,7 +119,7 @@ int geraPergunta(tp_pilha *perguntas, tp_pilha *perguntas_descartadas){
     }
 }
 
-// Versão estendida usada pelo jogadores.h para registrar o historico.
+// versao estendida usada pelo jogadores.h para registrar o historico
 int geraPerguntaComHistorico(tp_pilha *perguntas, tp_pilha *perguntas_descartadas,
                               tp_pergunta *pergunta_saida, char *resp_saida){
     tp_pergunta e;
