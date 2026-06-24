@@ -29,7 +29,7 @@ typedef struct {
 } tp_hank;
 
 typedef struct {
-    int numero_casa; // Será a nossa CHAVE de busca na Árvore
+    int numero_casa;
     int vezes_caiu;
     int acertos;
     int erros;
