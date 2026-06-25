@@ -653,6 +653,8 @@ int main(void) {
     // FILA OFICIAL DE JOGADORES (Substitui os testes antigos)
     tp_fila *filaJogadores = inicializa_fila();
 
+    inicializa_historico();
+
     // VARIÁVEIS DE CONTROLE DA TELA DE CADASTRO
     int qtdJogadoresConfig = 0;
     int jogadorAtualCadastro = 1;
@@ -1475,11 +1477,13 @@ int main(void) {
                                 acertouPergunta = true;
                                 registra_passagem(arvore, jogadorDaVez.posicao->info.posicao, 1, 0); // <-- REGISTRA ACERTO NA AVL
                                 atualiza_hank(&jogadorDaVez, casasReais * 10);
+                                salvarHistoricoResposta(jogadorDaVez.nome, perguntaAtual, toupper(respostaEscolhida), "Acertou");
                                 pulosExtras = casasReais;
                             } else {
                                 acertouPergunta = false;
                                 registra_passagem(arvore, jogadorDaVez.posicao->info.posicao, 0, 1); // <-- REGISTRA ERRO NA AVL
                                 atualiza_hank(&jogadorDaVez, -casasReais * 10);
+                                salvarHistoricoResposta(jogadorDaVez.nome, perguntaAtual, toupper(respostaEscolhida), "Errou");
                                 pulosExtras = -casasReais;
                             }
 
