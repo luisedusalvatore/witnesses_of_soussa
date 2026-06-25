@@ -14,24 +14,43 @@ void inicializa_historico() {
         return; // arquivo ja existe, nao sobrescreve
     }
 
+    
     f = fopen("historico_respostas.csv", "w");
     if (f == NULL) {
-        printf("[ERRO] Nao foi possivel criar o arquivo de historico.\n");
+        perror("[ERRO] Nao foi possivel criar o arquivo de historico");
+        printf("[DICA] Verifique se o programa tem permissao de escrita na pasta atual.\n");
         return;
     }
 
     // cabecalho padrao definido pelo PDF do professor
     fprintf(f, "turma;nome_jogador;id_pergunta;unidade;tema;subtema;dificuldade;resposta_jogador;resposta_correta;resultado\n");
+
+    
+    fflush(f);
     fclose(f);
+
+    printf("[OK] Arquivo 'historico_respostas.csv' criado com sucesso.\n");
 }
 
 // salva uma linha no csv para cada resposta dada durante o jogo.
 // Chamada pelo jogadores.h logo apos o jogador responder.
 void salvarHistoricoResposta(char *nome_jogador, tp_pergunta p,
                               char resposta_jogador, char *resultado) {
+
+    
+    // o fopen com "a" cria o arquivo se nao existir, mas sem cabecalho.
+    // por isso verificamos primeiro com "r" e, se necessario, recriamos com cabecalho.
+    FILE *teste = fopen("historico_respostas.csv", "r");
+    if (teste == NULL) {
+        // arquivo sumiu ou nunca foi criado — reinicializa
+        inicializa_historico();
+    } else {
+        fclose(teste);
+    }
+
     FILE *f = fopen("historico_respostas.csv", "a"); // "a" = append, nao apaga o que ja existe
     if (f == NULL) {
-        printf("[ERRO] Nao foi possivel abrir o historico para escrita.\n");
+        perror("[ERRO] Nao foi possivel abrir o historico para escrita");
         return;
     }
 
@@ -47,6 +66,9 @@ void salvarHistoricoResposta(char *nome_jogador, tp_pergunta p,
         resultado           // "Acertou" ou "Errou"
     );
 
+    
+    
+    fflush(f);
     fclose(f);
 }
 

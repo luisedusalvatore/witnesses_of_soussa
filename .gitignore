@@ -4,3 +4,5 @@ menu.exe
 main.exe
 output/
 raylib-4.2.0_linux_amd64/
+.vscode/launch.json
+.vscode/settings.json
